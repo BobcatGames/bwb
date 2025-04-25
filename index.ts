@@ -25,9 +25,11 @@
 /*
   TODO:
   - Save the "newRestraints" to the save file
-  - Correctly identify restraints
   - Add all other enhancements
-  - Finetune the stat increase, *1.1 seems alright.
+  - Finetune the stat increase, *1.1 seems alright for base.
+    But be careful for class synergies, e.g.
+      Toys + trainee is OP
+      Hands + warrior can be crippling
   - Add flavor text
   (e.g. Your bond with XY grows stronger!)
 
@@ -49,7 +51,7 @@ KinkyDungeonAddRestraint = function (...args) {
   // Truthy, if we're currently removing an item, and this one becomes the top.
   // In this case, we're not actually equipping anything new.
   const isUnlinking = args[9];
-  // The variantname should be unique for enhanced restraints.
+  // The variantname should be unique for enchanted restraints.
   const variantName = args[14];
 
   if (variantName && !isUnlinking) {
@@ -74,23 +76,27 @@ KDAdvanceLevel = function (...args) {
     console.debug(wornRestraints);
     console.debug(newRestraints);
     for (const r of wornRestraints) {
-      // Only consider locked items
-      // TODO: better check for actual restraints
-      if (!r.item.lock) continue;
-
       // New restraints do not count, only for the next level
       if (newRestraints.has(r.item.inventoryVariant)) continue;
 
       const baseRestraint = KDRestraint(r.item);
+      // Armors don't count, no matter how enchanted they are.
+      // TODO: check for mimic handling.
+      if (baseRestraint.armor) continue;
+
+      // TODO: Do something with locked restraints
+      //       But only, if it was locked througout the whole floor.
+      //       A bit extra stat buff?
+      //if (!r.item.lock)
 
       for (const e of r.item.events) {
-        // For debugging, only adjust accuracy by +100%.
-        if (e.original === 'Accuracy') {
+        // For debugging, adjust accuracy by +100%.
+        if (e.original === "Accuracy") {
           switch (e.trigger) {
-            case 'tick':
+            case "tick":
               e.power += 1;
               break;
-            case 'inventoryTooltip':
+            case "inventoryTooltip":
               e.power += 100;
               break;
           }
