@@ -11,9 +11,15 @@ You may freely make derivative works based on this mod, as long as you comply wi
 
 ## Building
 
-Needs a recent NodeJS version.
+Needs a recent NodeJS version, and 7zip in the path.
+
+    npm install
+    npm run build      # Linux, MacOS, Win+Bash
+    npm run build:win  # Win (cmd or powershell)
+
+If you don't have 7zip:
 
     npm install
     npx tsc
 
-Then zip up the dist/index.js (rename to .ks if needed) and the mod.json.
+Then zip up the dist/index.js (rename to .ks if needed) and the mod.json files.
