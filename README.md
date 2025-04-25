@@ -11,4 +11,9 @@ You may freely make derivative works based on this mod, as long as you comply wi
 
 ## Building
 
-There's no build script yet. Just zip up the index.js and mod.json files.
+Needs a recent NodeJS version.
+
+    npm install
+    npx tsc
+
+Then zip up the dist/index.js (rename to .ks if needed) and the mod.json.
