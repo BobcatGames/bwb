@@ -30,38 +30,49 @@
   - Finetune the stat increase, *1.1 seems alright.
   - Add flavor text
   (e.g. Your bond with XY grows stronger!)
+
+  Ideas:
+  - Tightness can increase instead.
+    Not b/c you cannot struggle out, but you don't want to
+    Extra flavor text, if possible?
 */
 
 
 /**
  * The list of restraints (variants) equipped this floor.
- * @type {Set<string>}
  */
-let newRestraints = new Set();
+let newRestraints = new Set<string>();
 
 let Orig_KinkyDungeonAddRestraint = KinkyDungeonAddRestraint;
+// @ts-expect-error
 KinkyDungeonAddRestraint = function (...args) {
+  // Truthy, if we're currently removing an item, and this one becomes the top.
+  // In this case, we're not actually equipping anything new.
+  const isUnlinking = args[9];
   // The variantname should be unique for enhanced restraints.
   const variantName = args[14];
-  if (variantName) {
+
+  if (variantName && !isUnlinking) {
     newRestraints.add(variantName);
   }
+  console.debug('Equipping', args);
   // It doesn't actually matter if equipping failed or not, only the attempt.
   return Orig_KinkyDungeonAddRestraint(...args);
 }
 
 
 let Orig_KDAdvanceLevel = KDAdvanceLevel;
+// @ts-expect-error
 KDAdvanceLevel = function (...args) {
   const retVal = Orig_KDAdvanceLevel(...args);
   // Run the code AFTER advancing the level, that's when the level
   // variables will be correct
 
   if (MiniGameKinkyDungeonLevel > KDGameData.HighestLevelCurrent) {
-    console.log("Restraintchallenge: New floor");
+    console.debug("BWB: New floor");
     const wornRestraints = KinkyDungeonAllRestraintDynamic();
-    console.log(wornRestraints);
-    console.log(newRestraints);
+    console.debug(wornRestraints);
+    console.debug(newRestraints);
     for (const r of wornRestraints) {
       // Only consider locked items
       // TODO: better check for actual restraints
@@ -69,6 +80,8 @@ KDAdvanceLevel = function (...args) {
 
       // New restraints do not count, only for the next level
       if (newRestraints.has(r.item.inventoryVariant)) continue;
+
+      const baseRestraint = KDRestraint(r.item);
 
       for (const e of r.item.events) {
         // For debugging, only adjust accuracy by +100%.
@@ -84,7 +97,7 @@ KDAdvanceLevel = function (...args) {
         }
       }
     }
-    // Now floor, clean slate
+    // New floor, clean slate
     newRestraints.clear();
   }
   return retVal;
