@@ -12,6 +12,7 @@ interface BWB_Wearable {
 }
 
 interface BWB_WearableInstance {
+  name: string;
   lock: string;
   inventoryVariant: string;
   tightness: number;
@@ -22,6 +23,10 @@ interface BWB_WearableInstance {
   }[];
 }
 
+// Colors:
+declare const KDBasePink;
+declare const KDBaseYellow;
+
 declare function KinkyDungeonAddRestraint(...args: any[]): any;
 declare function KDAdvanceLevel(...args: any[]): any;
 declare const MiniGameKinkyDungeonLevel: number;
@@ -29,4 +34,11 @@ declare const KDGameData: {
   HighestLevelCurrent: number;
 };
 declare function KinkyDungeonAllRestraintDynamic(): { item: BWB_WearableInstance }[];
-declare function KDRestraint(BWB_WearableInstance): BWB_Wearable;
+declare function KDRestraint(instance: BWB_WearableInstance): BWB_Wearable;
+
+declare function addTextKey(name: string, text: string): void;
+declare function TextGet(name: string, params: object): string;
+declare function KDGetItemName(item: BWB_WearableInstance): string;
+
+declare function KinkyDungeonSendTextMessage(priority: number, text: string, color: string, time?: number): boolean;
+

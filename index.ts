@@ -30,13 +30,13 @@
     But be careful for class synergies, e.g.
       Toys + trainee is OP
       Hands + warrior can be crippling
-  - Add flavor text
-  (e.g. Your bond with XY grows stronger!)
 
   Ideas:
   - Tightness can increase instead.
     Not b/c you cannot struggle out, but you don't want to
     Extra flavor text, if possible?
+  - If the "bonding level" is high enough, allow renaming the item
+    Override KDGetItemName()
 */
 
 
@@ -102,9 +102,24 @@ KDAdvanceLevel = function (...args) {
           }
         }
       }
+      // TODO: Get the proper name
+      const text = CheckedTextGet("BWB_Powerup", {
+        RestraintName: KDGetItemName(r.item),
+      });
+      KinkyDungeonSendTextMessage(5, text, KDBasePink, 5);
     }
     // New floor, clean slate
     newRestraints.clear();
   }
   return retVal;
 }
+
+const TextKeys = Object.freeze({
+  BWB_Powerup: 'Your bond with ${RestraintName} increased!',
+});
+
+function CheckedTextGet(key: keyof typeof TextKeys, params: object) {
+  return TextGet(key, params);
+}
+Object.entries(TextKeys).forEach(e => addTextKey(e[0], e[1]));
+
