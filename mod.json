@@ -1,11 +1,11 @@
 {
-	"modname": "Restraint Challange WIP",
-	"moddesc": "",
-	"author": "Itsumi Mario",
-	"modbuild": 1,
-	"gamemajor": 5,
-	"gameminor": 4,
-	"gamepatch_min": 66,
-	"gamepatch_max": -1,
-	"priority": 0
+  "modname": "Bonding with bondage",
+  "moddesc": "If you wear a restraint for the whole floor, it's enhancement stats increase a bit.",
+  "author": "Bobcat",
+  "modbuild": 1,
+  "gamemajor": 5,
+  "gameminor": 4,
+  "gamepatch_min": 66,
+  "gamepatch_max": -1,
+  "priority": 0
 }
