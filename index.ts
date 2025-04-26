@@ -24,7 +24,7 @@
 
 /*
   TODO:
-  - Add all other enhancements
+  - Add all other enchantments
   - Finetune the stat increase, *1.1 seems alright for base.
     But be careful for class synergies, e.g.
       Toys + trainee is OP
@@ -38,10 +38,21 @@
     Override KDGetItemName()
 
   Flavor text:
-  - You reluctantly remove the ${RestraintName}.
-  - You can't remove the ${RestraintName}... but do you really want to?
-  - You forlornly look at the remains of the ${RestraintName}...
-  - You can't cut the ${RestraintName}... but do you really want to?
+    You reluctantly remove the ${RestraintName}.
+    You begin to remove the ${RestraintName}, but change your mind halfway through.
+    You can't remove the ${RestraintName}... but do you really want to?
+    You forlornly look at the remains of the ${RestraintName}...
+    You try to cut the ${RestraintName}, but your hands stop before the last cut.
+    You can't cut the ${RestraintName}... but do you really want to?
+  If you removed an item that already has some levels (e.g. min 5?), and put it back:
+    Min 5:
+      You can't help but notice that putting the ${RestraintName} felt just a little bit good...
+    Min 10:
+      You felt so lonely without the ${RestraintName}, but finally it's back!
+    Min 14:
+      How did the ${RestraintName} even get off? You promise that you'll never take it off again.
+
+
 
 */
 
@@ -126,20 +137,65 @@ KDAdvanceLevel = function (...args) {
       increaseRestraintLevel(r.item);
 
       const fullName = KDGetItemName(r.item);
-      const text = CheckedTextGet("BWB_Powerup", {
+      let flavorTextKey: FlavorTextKey;
+      let color = KDBasePink;
+      switch (r.item.bwb_level) {
+        case 1:
+          flavorTextKey = "BWB_Powerup_1st";
+          break;
+        case 2:
+          flavorTextKey = "BWB_Powerup_Low";
+          break;
+        case 5:
+          flavorTextKey = "BWB_Powerup_Medium";
+          break;
+        case 10:
+          flavorTextKey = "BWB_Powerup_High";
+          break;
+        case 14:
+          flavorTextKey = "BWB_Powerup_XHigh";
+          break;
+        case undefined:
+          throw new Error(
+            "BWBMod: increaseRestraintLevel should have set bwb_level"
+          );
+          break;
+        default:
+          if (r.item.bwb_level > 15 && r.item.bwb_level % 5 == 0) {
+            flavorTextKey = "BWB_Powerup_TooHigh";
+          } else {
+            flavorTextKey = "BWB_Powerup_Generic";
+            color = KDBaseWhite;
+          }
+          break;
+      }
+      const text = CheckedTextGet(flavorTextKey, {
         RestraintName: fullName,
       });
-      KinkyDungeonSendTextMessage(5, text, KDBasePink, 5);
+      KinkyDungeonSendTextMessage(5, text, color, 5);
     }
   }
   return retVal;
 };
 
 const TextKeys = Object.freeze({
-  BWB_Powerup: "Your bond with the ${RestraintName} increased!",
+  BWB_Powerup_Generic:
+    "Your bond with the ${RestraintName} increased a little bit!",
+  BWB_Powerup_1st:
+    "As you've been wearing the ${RestraintName} for while, you start to get attached.",
+  BWB_Powerup_Low: "Your're getting used to wearing the ${RestraintName}.",
+  BWB_Powerup_Medium:
+    "The ${RestraintName} is starting to feel actually comfortable.",
+  BWB_Powerup_High:
+    "Maybe it wouldn't even be so bad if you never took off the ${RestraintName}...",
+  BWB_Powerup_XHigh:
+    "You feel like the ${RestraintName} is an actual part of your body.",
+  BWB_Powerup_TooHigh:
+    "You don't even remember what was it like not wearing the ${RestraintName} anymore.",
 });
+type FlavorTextKey = keyof typeof TextKeys;
 
-function CheckedTextGet(key: keyof typeof TextKeys, params: object) {
+function CheckedTextGet(key: FlavorTextKey, params: object) {
   return TextGet(key, params);
 }
 Object.entries(TextKeys).forEach((e) => addTextKey(e[0], e[1]));

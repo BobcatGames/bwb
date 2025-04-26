@@ -43,6 +43,7 @@ type KDEventData_PostApply = {
 // Colors:
 declare const KDBasePink;
 declare const KDBaseYellow;
+declare const KDBaseWhite;
 
 declare function KinkyDungeonAddRestraint(...args: any[]): any;
 declare function KDAdvanceLevel(...args: any[]): any;
