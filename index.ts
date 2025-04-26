@@ -24,7 +24,6 @@
 
 /*
   TODO:
-  - Save the "newRestraints" to the save file
   - Add all other enhancements
   - Finetune the stat increase, *1.1 seems alright for base.
     But be careful for class synergies, e.g.
@@ -50,6 +49,15 @@
  * The list of restraints (variants) equipped this floor.
  */
 let newRestraints = new Set<string>();
+
+function init() {
+  console.debug("Clearin listof restraints...");
+  console.debug("Before", Array.from(newRestraints))
+  newRestraints = new Set<string>();
+  console.debug("After", Array.from(newRestraints));
+}
+
+KDEventMapGeneric.beforeNewGame.bwb_init = () => init();
 
 let Orig_KinkyDungeonAddRestraint = KinkyDungeonAddRestraint;
 // @ts-expect-error

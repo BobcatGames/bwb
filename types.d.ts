@@ -54,3 +54,8 @@ declare function KinkyDungeonLoadGame(s?: string): boolean;
 declare function DecompressB64(s: string): string;
 declare const KDSaveSlot: number;
 declare const loadedsaveslots: string[];
+
+declare const KDEventMapGeneric: Record<
+  string,
+  Record<string, (e: string, data: any) => void>
+>;
