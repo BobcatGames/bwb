@@ -19,11 +19,15 @@ interface BWB_WearableInstance {
   events: {
     original: string;
     power: number;
+    bwb_basePower?: number;
     trigger: "tick" | "inventoryTooltip";
   }[];
 
   // Extra stuff must be nullable
+  /** The restraint was equipped this floor. */
   bwb_isNewRestraint?: boolean;
+  /** The number of complete floors the restraint was quipped. */
+  bwb_level?: number;
 }
 
 type KDEventData_PostApply = {

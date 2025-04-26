@@ -59,6 +59,36 @@ KDEventMapGeneric.postApply.bwb_newRestraint = (
   console.debug(data.item);
 };
 
+/**
+ * Increases the restraints bond level, and upgrades it's stats accordingly.
+ * @param item
+ */
+function increaseRestraintLevel(item: BWB_WearableInstance) {
+  if (!item.bwb_level) {
+    // New restraint the mod hasn't encountered before.
+    item.bwb_level = 1;
+  } else {
+    item.bwb_level++;
+  }
+  for (const e of item.events) {
+    if (!e.bwb_basePower) {
+      e.bwb_basePower = e.power;
+    }
+
+    // Debug: adjust accuracy by +100% / level
+    if (e.original === "Accuracy") {
+      switch (e.trigger) {
+        case "tick":
+          e.power = e.bwb_basePower + item.bwb_level;
+          break;
+        case "inventoryTooltip":
+          e.power = e.bwb_basePower + item.bwb_level * 100;
+          break;
+      }
+    }
+  }
+}
+
 let Orig_KDAdvanceLevel = KDAdvanceLevel;
 // @ts-expect-error
 KDAdvanceLevel = function (...args) {
@@ -88,21 +118,11 @@ KDAdvanceLevel = function (...args) {
       //       A bit extra stat buff?
       //if (!r.item.lock)
 
-      for (const e of r.item.events) {
-        // For debugging, adjust accuracy by +100%.
-        if (e.original === "Accuracy") {
-          switch (e.trigger) {
-            case "tick":
-              e.power += 1;
-              break;
-            case "inventoryTooltip":
-              e.power += 100;
-              break;
-          }
-        }
-      }
+      increaseRestraintLevel(r.item);
+
+      const fullName = KDGetItemName(r.item);
       const text = CheckedTextGet("BWB_Powerup", {
-        RestraintName: KDGetItemName(r.item),
+        RestraintName: fullName,
       });
       KinkyDungeonSendTextMessage(5, text, KDBasePink, 5);
     }
