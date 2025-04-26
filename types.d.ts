@@ -1,5 +1,5 @@
 // This is a subset of the KD types, with only the relevant properties.
-// The best would be if we could generate a .d.ts file suring the KD build process,
+// The best would be if we could generate a .d.ts file during the KD build process,
 // but for now, this is enough.
 
 /**

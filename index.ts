@@ -51,7 +51,7 @@
 let newRestraints = new Set<string>();
 
 function init() {
-  console.debug("Clearin listof restraints...");
+  console.debug("Clearing list of restraints...");
   console.debug("Before", Array.from(newRestraints))
   newRestraints = new Set<string>();
   console.debug("After", Array.from(newRestraints));
