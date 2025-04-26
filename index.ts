@@ -4,8 +4,8 @@
   The overall algorithm:
 
   At the end of every floor, we must check whether restraints were removed on this floor.
-    The game does not store the history, and catching every possible way an item can be removed/unequipped
-    (manually, shrine, shopkeep, offers...) is daunting, and would probably be buggy.
+  The game does not store the history, and catching every possible way an item can be removed/unequipped
+  (manually, shrine, shopkeep, offers...) is daunting, and would probably be buggy.
   A check still must happen somehow, however.
 
   Instead, we override the AddRestraint function, listen in for adding attempts,
@@ -14,8 +14,8 @@
   restraint, the algorithm will still work.
 
   At the end of the floor, we now have:
-    * A list of restraints the player is wearing, and
-    * A list of restraints the player tried to equip this floor
+   * A list of restraints the player is wearing, and
+   * A list of restraints the player tried to equip this floor
   If an item is on the former list, and not on the second, then it must have been equipped on a prev. level.
 
   We do the magic, and then clear the "new restraints" list.
@@ -46,7 +46,6 @@
 
 */
 
-
 /**
  * The list of restraints (variants) equipped this floor.
  */
@@ -64,11 +63,10 @@ KinkyDungeonAddRestraint = function (...args) {
   if (variantName && !isUnlinking) {
     newRestraints.add(variantName);
   }
-  console.debug('Equipping', args);
+  console.debug("Equipping", args);
   // It doesn't actually matter if equipping failed or not, only the attempt.
   return Orig_KinkyDungeonAddRestraint(...args);
-}
-
+};
 
 let Orig_KDAdvanceLevel = KDAdvanceLevel;
 // @ts-expect-error
@@ -119,14 +117,45 @@ KDAdvanceLevel = function (...args) {
     newRestraints.clear();
   }
   return retVal;
-}
+};
+
+// It's really easy to add data to the save file...
+const Orig_KinkyDungeonGenerateSaveData = KinkyDungeonGenerateSaveData;
+// @ts-expect-error
+KinkyDungeonGenerateSaveData = function () {
+  const saveData = Orig_KinkyDungeonGenerateSaveData();
+  saveData.bwb_newRestraints = Array.from(newRestraints);
+  return saveData;
+};
+
+// ...but loading is a bit trickier.
+const Orig_KinkyDungeonLoadGame = KinkyDungeonLoadGame;
+// @ts-expect-error
+KinkyDungeonLoadGame = function (String?: string) {
+  const retVal = Orig_KinkyDungeonLoadGame(String);
+  if (retVal) {
+    // This code was copied from Game/src/base/KinkiDungeon.ts, KinkyDungeonLoadGame()
+    // Replace it when a proper loading event handler is in.
+    let str = String
+      ? DecompressB64(String.trim())
+      : localStorage.getItem("KinkyDungeonSave")
+      ? DecompressB64(localStorage.getItem("KinkyDungeonSave"))
+      : loadedsaveslots[KDSaveSlot - 1]
+      ? DecompressB64(loadedsaveslots[KDSaveSlot - 1])
+      : "";
+    const saveData = JSON.parse(str) as BWB_SaveData;
+    console.debug("Lodaded save data");
+    console.debug(saveData.bwb_newRestraints);
+    newRestraints = new Set(saveData.bwb_newRestraints);
+  }
+  return retVal;
+};
 
 const TextKeys = Object.freeze({
-  BWB_Powerup: 'Your bond with the ${RestraintName} increased!',
+  BWB_Powerup: "Your bond with the ${RestraintName} increased!",
 });
 
 function CheckedTextGet(key: keyof typeof TextKeys, params: object) {
   return TextGet(key, params);
 }
-Object.entries(TextKeys).forEach(e => addTextKey(e[0], e[1]));
-
+Object.entries(TextKeys).forEach((e) => addTextKey(e[0], e[1]));

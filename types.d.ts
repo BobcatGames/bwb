@@ -23,6 +23,13 @@ interface BWB_WearableInstance {
   }[];
 }
 
+// Custom save data
+
+interface BWB_SaveData /* :KinkyDungeonSave */ {
+  // Every member must be nullable here, the mod might not have been enabled/installed
+  bwb_newRestraints?: string[];
+}
+
 // Colors:
 declare const KDBasePink;
 declare const KDBaseYellow;
@@ -42,3 +49,8 @@ declare function KDGetItemName(item: BWB_WearableInstance): string;
 
 declare function KinkyDungeonSendTextMessage(priority: number, text: string, color: string, time?: number): boolean;
 
+declare function KinkyDungeonGenerateSaveData(): BWB_SaveData;
+declare function KinkyDungeonLoadGame(s?: string): boolean;
+declare function DecompressB64(s: string): string;
+declare const KDSaveSlot: number;
+declare const loadedsaveslots: string[];
