@@ -9,17 +9,22 @@
   A check still must happen somehow, however.
 
   Instead, we override the AddRestraint function, listen in for adding attempts,
-  and remember them for this floor.
+  and mark newly added restraints.
   It doesn't matter if the equipping ended in a failure, or the item wasn't even a proper
   restraint, the algorithm will still work.
 
   At the end of the floor, we now have:
-   * A list of restraints the player is wearing, and
-   * A list of restraints the player tried to equip this floor
-  If an item is on the former list, and not on the second, then it must have been equipped on a prev. level.
+   * A list of enchanted restraints the player is wearing, and
+   * If the item was equipped this floor, it will be marked.
+   * It it doesn't have a mark:
+    * It was equipped on a prev. floor OR
+    * It was equipped before installing this mod.
+  We can't really do much about the latter case, so we'll just let it slide.
 
-  We do the magic, and then clear the "new restraints" list.
-  That way, all currently equipped restraint will count for the next floor.
+  We do the magic, and then unmark all.
+  That way, all currently equipped restraints will count for the next floor.
+
+  The marks survive saving and reloading, so no extra save+load code is needed.
  */
 
 /*
@@ -44,13 +49,16 @@
     You forlornly look at the remains of the ${RestraintName}...
     You try to cut the ${RestraintName}, but your hands stop before the last cut.
     You can't cut the ${RestraintName}... but do you really want to?
-  If you removed an item that already has some levels (e.g. min 5?), and put it back:
+  If you removed an item that already has some levels, and put it back:
     Min 5:
-      You can't help but notice that putting the ${RestraintName} felt just a little bit good...
+      You can't help but notice that putting the ${RestraintName} on felt a little bit good...
+      Just in case.
     Min 10:
       You felt so lonely without the ${RestraintName}, but finally it's back!
+      Nice and secure!
     Min 14:
       How did the ${RestraintName} even get off? You promise that you'll never take it off again.
+      You promise that you'll never take it off again, and show your resolve with a nice little lock.
 
 
 
@@ -172,6 +180,11 @@ KDAdvanceLevel = function (...args) {
         RestraintName: fullName,
       });
       KinkyDungeonSendTextMessage(5, text, color, 5);
+
+      // TODO: Some restraints cannot be locked, e.g. toys need a belt.
+      if (r.item.bwb_level >= 5 && !r.item.lock) {
+        KinkyDungeonSendTextMessage(5, CheckedTextGet("BWB_LockUrge"), KDBasePink, 5);
+      }
     }
   }
   return retVal;
@@ -186,15 +199,17 @@ const TextKeys = Object.freeze({
   BWB_Powerup_Medium:
     "The ${RestraintName} is starting to feel actually comfortable.",
   BWB_Powerup_High:
-    "Maybe it wouldn't even be so bad if you never took off the ${RestraintName}...",
+    "Maybe it wouldn't even be so bad if you never took off the ${RestraintName}.",
   BWB_Powerup_XHigh:
     "You feel like the ${RestraintName} is an actual part of your body.",
   BWB_Powerup_TooHigh:
-    "You don't even remember what was it like not wearing the ${RestraintName} anymore.",
+    "You don't even remember what it was like not wearing the ${RestraintName} anymore.",
+  BWB_LockUrge:
+    "You feel an urge to lock it...",
 });
 type FlavorTextKey = keyof typeof TextKeys;
 
-function CheckedTextGet(key: FlavorTextKey, params: object) {
+function CheckedTextGet(key: FlavorTextKey, params: object = {}) {
   return TextGet(key, params);
 }
 Object.entries(TextKeys).forEach((e) => addTextKey(e[0], e[1]));
