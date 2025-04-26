@@ -2,24 +2,24 @@
 
 /*
   The overall algorithm:
-  - At the end of every floor, we must check whether a restraint was removed on this floor.
+
+  At the end of every floor, we must check whether restraints were removed on this floor.
     The game does not store the history, and catching every possible way an item can be removed/unequipped
     (manually, shrine, shopkeep, offers...) is daunting, and would probably be buggy.
   A check still must happen somehow, however.
 
-  - Instead, we override the AddRestraint function, and listen in for adding attempts.
-    If we see any kind of restraint, we remember it for this floor.
-  It doesn't even matter if the details are incorrect (success? failure? to the player? to an enemy?),
-  since if the game is trying to equip a restraint, it's either a new restraint,
-  or it must have been uneqipped beforehand.
+  Instead, we override the AddRestraint function, listen in for adding attempts,
+  and remember them for this floor.
+  It doesn't matter if the equipping ended in a failure, or the item wasn't even a proper
+  restraint, the algorithm will still work.
 
-  - At the end of the floor, we now have:
+  At the end of the floor, we now have:
     * A list of restraints the player is wearing, and
     * A list of restraints the player tried to equip this floor
-  If and item is on the former list, and not on the second, then it must have been equipped on a prev. level.
+  If an item is on the former list, and not on the second, then it must have been equipped on a prev. level.
 
-  - Clear the "new restraints" list, so all current restraint will count for the next floor.
-
+  We do the magic, and then clear the "new restraints" list.
+  That way, all currently equipped restraint will count for the next floor.
  */
 
 /*
@@ -37,6 +37,13 @@
     Extra flavor text, if possible?
   - If the "bonding level" is high enough, allow renaming the item
     Override KDGetItemName()
+
+  Flavor text:
+  - You reluctantly remove the ${RestraintName}.
+  - You can't remove the ${RestraintName}... but do you really want to?
+  - You forlornly look at the remains of the ${RestraintName}...
+  - You can't cut the ${RestraintName}... but do you really want to?
+
 */
 
 
@@ -115,7 +122,7 @@ KDAdvanceLevel = function (...args) {
 }
 
 const TextKeys = Object.freeze({
-  BWB_Powerup: 'Your bond with ${RestraintName} increased!',
+  BWB_Powerup: 'Your bond with the ${RestraintName} increased!',
 });
 
 function CheckedTextGet(key: keyof typeof TextKeys, params: object) {
