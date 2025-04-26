@@ -75,14 +75,19 @@ function increaseRestraintLevel(item: BWB_WearableInstance) {
       e.bwb_basePower = e.power;
     }
 
-    // Debug: adjust accuracy by +100% / level
+    // Calculate the new stats as function of the bond level and the base power of the enchantment.
+    // This way, we can avoid a bunch of floating point issues (might not be an issue, but still),
+    // and we can apply more complex functions.
+
+    // Base: +10% stat per level
+    // Might be a bit too strong?
     if (e.original === "Accuracy") {
       switch (e.trigger) {
         case "tick":
-          e.power = e.bwb_basePower + item.bwb_level;
+          e.power = e.bwb_basePower * (1.1 ** item.bwb_level);
           break;
         case "inventoryTooltip":
-          e.power = e.bwb_basePower + item.bwb_level * 100;
+          e.power = e.bwb_basePower * (1.1 ** item.bwb_level);
           break;
       }
     }
