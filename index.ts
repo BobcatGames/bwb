@@ -45,35 +45,18 @@
 
 */
 
-/**
- * The list of restraints (variants) equipped this floor.
- */
-let newRestraints = new Set<string>();
-
-function init() {
-  console.debug("Clearing list of restraints...");
-  console.debug("Before", Array.from(newRestraints))
-  newRestraints = new Set<string>();
-  console.debug("After", Array.from(newRestraints));
-}
-
-KDEventMapGeneric.beforeNewGame.bwb_init = () => init();
-
-let Orig_KinkyDungeonAddRestraint = KinkyDungeonAddRestraint;
-// @ts-expect-error
-KinkyDungeonAddRestraint = function (...args) {
+KDEventMapGeneric.postApply = {};
+KDEventMapGeneric.postApply.bwb_newRestraint = (
+  e,
+  data: KDEventData_PostApply,
+) => {
   // Truthy, if we're currently removing an item, and this one becomes the top.
   // In this case, we're not actually equipping anything new.
-  const isUnlinking = args[9];
-  // The variantname should be unique for enchanted restraints.
-  const variantName = args[14];
-
-  if (variantName && !isUnlinking) {
-    newRestraints.add(variantName);
-  }
-  console.debug("Equipping", args);
-  // It doesn't actually matter if equipping failed or not, only the attempt.
-  return Orig_KinkyDungeonAddRestraint(...args);
+  if (data.UnLink) return;
+  // We don't care about generic items.
+  if (!data.item.inventoryVariant) return;
+  data.item.bwb_isNewRestraint = true;
+  console.debug(data.item);
 };
 
 let Orig_KDAdvanceLevel = KDAdvanceLevel;
@@ -87,10 +70,13 @@ KDAdvanceLevel = function (...args) {
     console.debug("BWB: New floor");
     const wornRestraints = KinkyDungeonAllRestraintDynamic();
     console.debug(wornRestraints);
-    console.debug(newRestraints);
     for (const r of wornRestraints) {
       // New restraints do not count, only for the next level
-      if (newRestraints.has(r.item.inventoryVariant)) continue;
+      if (r.item.bwb_isNewRestraint) {
+        // Clear the new reatraint flag, it's not new for the next level
+        r.item.bwb_isNewRestraint = false;
+        continue;
+      }
 
       const baseRestraint = KDRestraint(r.item);
       // Armors don't count, no matter how enchanted they are.
@@ -115,46 +101,11 @@ KDAdvanceLevel = function (...args) {
           }
         }
       }
-      // TODO: Get the proper name
       const text = CheckedTextGet("BWB_Powerup", {
         RestraintName: KDGetItemName(r.item),
       });
       KinkyDungeonSendTextMessage(5, text, KDBasePink, 5);
     }
-    // New floor, clean slate
-    newRestraints.clear();
-  }
-  return retVal;
-};
-
-// It's really easy to add data to the save file...
-const Orig_KinkyDungeonGenerateSaveData = KinkyDungeonGenerateSaveData;
-// @ts-expect-error
-KinkyDungeonGenerateSaveData = function () {
-  const saveData = Orig_KinkyDungeonGenerateSaveData();
-  saveData.bwb_newRestraints = Array.from(newRestraints);
-  return saveData;
-};
-
-// ...but loading is a bit trickier.
-const Orig_KinkyDungeonLoadGame = KinkyDungeonLoadGame;
-// @ts-expect-error
-KinkyDungeonLoadGame = function (String?: string) {
-  const retVal = Orig_KinkyDungeonLoadGame(String);
-  if (retVal) {
-    // This code was copied from Game/src/base/KinkiDungeon.ts, KinkyDungeonLoadGame()
-    // Replace it when a proper loading event handler is in.
-    let str = String
-      ? DecompressB64(String.trim())
-      : localStorage.getItem("KinkyDungeonSave")
-      ? DecompressB64(localStorage.getItem("KinkyDungeonSave"))
-      : loadedsaveslots[KDSaveSlot - 1]
-      ? DecompressB64(loadedsaveslots[KDSaveSlot - 1])
-      : "";
-    const saveData = JSON.parse(str) as BWB_SaveData;
-    console.debug("Lodaded save data");
-    console.debug(saveData.bwb_newRestraints);
-    newRestraints = new Set(saveData.bwb_newRestraints);
   }
   return retVal;
 };

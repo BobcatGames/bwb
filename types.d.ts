@@ -21,14 +21,20 @@ interface BWB_WearableInstance {
     power: number;
     trigger: "tick" | "inventoryTooltip";
   }[];
+
+  // Extra stuff must be nullable
+  bwb_isNewRestraint?: boolean;
 }
 
-// Custom save data
+type KDEventData_PostApply = {
+  player: any;
+  item: BWB_WearableInstance | null;
+  host: any;
+  keep: boolean;
+  Link: boolean;
+  UnLink: boolean;
+};
 
-interface BWB_SaveData /* :KinkyDungeonSave */ {
-  // Every member must be nullable here, the mod might not have been enabled/installed
-  bwb_newRestraints?: string[];
-}
 
 // Colors:
 declare const KDBasePink;
@@ -49,13 +55,7 @@ declare function KDGetItemName(item: BWB_WearableInstance): string;
 
 declare function KinkyDungeonSendTextMessage(priority: number, text: string, color: string, time?: number): boolean;
 
-declare function KinkyDungeonGenerateSaveData(): BWB_SaveData;
-declare function KinkyDungeonLoadGame(s?: string): boolean;
-declare function DecompressB64(s: string): string;
-declare const KDSaveSlot: number;
-declare const loadedsaveslots: string[];
-
 declare const KDEventMapGeneric: Record<
   string,
-  Record<string, (e: string, data: any) => void>
+  Record<string, (e: string, ...data: any) => void>
 >;
