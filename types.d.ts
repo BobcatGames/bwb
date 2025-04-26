@@ -56,7 +56,7 @@ declare function KinkyDungeonAllRestraintDynamic(): { item: BWB_WearableInstance
 declare function KDRestraint(instance: BWB_WearableInstance): BWB_Wearable;
 
 declare function addTextKey(name: string, text: string): void;
-declare function TextGet(name: string, params: object): string;
+//declare function TextGet(name: string, params: object): string;
 declare function KDGetItemName(item: BWB_WearableInstance): string;
 
 declare function KinkyDungeonSendTextMessage(priority: number, text: string, color: string, time?: number): boolean;
@@ -66,4 +66,7 @@ declare const KDEventMapGeneric: Record<
   Record<string, (e: string, ...data: any) => void>
 >;
 
+declare const KDInventoryAction: Record<string, object>;
+
 declare const KDEventEnchantmentModular: Record<string, any>;
+declare const KDInventoryActionsDefault: Record<string, (item: BWB_WearableInstance) => string[]>;

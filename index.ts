@@ -184,7 +184,7 @@ KDAdvanceLevel = function (...args) {
           }
           break;
       }
-      const text = CheckedTextGet(flavorTextKey, {
+      const text = TextGet(flavorTextKey, {
         RestraintName: fullName,
       });
       KinkyDungeonSendTextMessage(5, text, color, 5);
@@ -193,7 +193,7 @@ KDAdvanceLevel = function (...args) {
       if (r.item.bwb_level >= 5 && !r.item.lock) {
         KinkyDungeonSendTextMessage(
           5,
-          CheckedTextGet("BWB_LockUrge"),
+          TextGet("BWB_LockUrge"),
           KDBasePink,
           5
         );
@@ -203,12 +203,42 @@ KDAdvanceLevel = function (...args) {
   return retVal;
 };
 
+KDInventoryAction.BWBRename = {
+  text: (_player, _item) => {
+    return TextGet("BWB_InventoryAction_Rename");
+  },
+  icon: (_player, item) => {
+    return "InventoryAction/Use";
+  },
+  valid: (_player, _item) => {
+    return true;
+  },
+  show: (_player, item) => {
+    return true;
+  },
+  click: (player, item) => {
+    // Rename dialog
+  },
+  cancel: (_player, _delta) => {
+    return false; // NA for default actions
+  },
+};
+
+const Orig_restraint = KDInventoryActionsDefault.restraint;
+KDInventoryActionsDefault.restraint = (item) => {
+  const retVal = Orig_restraint(item);
+  if (item.bwb_level) {
+    retVal.push("BWBRename");
+  }
+  return retVal;
+};
+
 const TextEnglish = {
   BWB_Powerup_Generic: "Your bond with ${RestraintName} increased a little!",
   BWB_Powerup_1st: "You've been wearing ${RestraintName} for a while.",
   BWB_Powerup_Low: "You're getting used to wearing ${RestraintName}.",
   BWB_Powerup_Medium:
-    "Wearing ${RestraintName} is starting to feel comfortable.",
+    "Wearing ${RestraintName} is starting to feel comfortable. Why not give it a name? (in inventory)",
   BWB_Powerup_High:
     "Maybe it wouldn't be so bad if you never took off ${RestraintName} ever again.",
   BWB_Powerup_XHigh:
@@ -216,10 +246,10 @@ const TextEnglish = {
   BWB_Powerup_TooHigh:
     "You don't even remember what it was like not to wear ${RestraintName} anymore.",
   BWB_LockUrge: "You feel an urge to lock it...",
+
+  BWB_InventoryAction_Rename: "Give it a name",
 } as const;
 type FlavorTextKey = keyof typeof TextEnglish;
 
-function CheckedTextGet(key: FlavorTextKey, params: object = {}) {
-  return TextGet(key, params);
-}
+declare function TextGet(key: FlavorTextKey, params?: object);
 Object.entries(TextEnglish).forEach((e) => addTextKey(e[0], e[1]));
