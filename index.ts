@@ -56,10 +56,10 @@
 
 */
 
-KDEventMapGeneric.postApply = {};
+if (!KDEventMapGeneric.postApply) KDEventMapGeneric.postApply = {};
 KDEventMapGeneric.postApply.bwb_newRestraint = (
-  e,
-  data: KDEventData_PostApply,
+  _e,
+  data: KDEventData_PostApply
 ) => {
   // Truthy, if we're currently removing an item, and this one becomes the top.
   // In this case, we're not actually equipping anything new.
@@ -159,7 +159,6 @@ KDAdvanceLevel = function (...args) {
           throw new Error(
             "BWBMod: increaseRestraintLevel should have set bwb_level"
           );
-          break;
         default:
           if (r.item.bwb_level > 15 && r.item.bwb_level % 5 == 0) {
             flavorTextKey = "BWB_Powerup_TooHigh";
