@@ -19,14 +19,15 @@ interface BWB_WearableInstance {
   events: {
     original: string;
     power: number;
+    trigger: string;
+    /** The original power, before the level ups. */
     bwb_basePower?: number;
-    trigger: "tick" | "inventoryTooltip";
   }[];
 
   // Extra stuff must be nullable
   /** The restraint was equipped this floor. */
   bwb_isNewRestraint?: boolean;
-  /** The number of complete floors the restraint was quipped. */
+  /** The number of completed floors with the restraint equipped. */
   bwb_level?: number;
 }
 
@@ -64,3 +65,5 @@ declare const KDEventMapGeneric: Record<
   string,
   Record<string, (e: string, ...data: any) => void>
 >;
+
+declare const KDEventEnchantmentModular: Record<string, any>;

@@ -59,9 +59,6 @@
     Min 14:
       How did the ${RestraintName} even get off? You promise that you'll never take it off again.
       You promise that you'll never take it off again, and show your resolve with a nice little lock.
-
-
-
 */
 
 if (!KDEventMapGeneric.postApply) KDEventMapGeneric.postApply = {};
@@ -89,7 +86,15 @@ function increaseRestraintLevel(item: BWB_WearableInstance) {
   } else {
     item.bwb_level++;
   }
+
+  const enchantments = Object.keys(KDEventEnchantmentModular);
   for (const e of item.events) {
+    // The events array contains other, non-enchantment related events (curses etc.)
+    if (!enchantments.includes(e.original)) continue;
+
+    // Nothing to upgrade
+    if (!e.power) continue;
+
     if (!e.bwb_basePower) {
       e.bwb_basePower = e.power;
     }
@@ -100,15 +105,18 @@ function increaseRestraintLevel(item: BWB_WearableInstance) {
 
     // Base: +10% stat per level
     // Might be a bit too strong?
-    if (e.original === "Accuracy") {
-      switch (e.trigger) {
-        case "tick":
-          e.power = e.bwb_basePower * (1.1 ** item.bwb_level);
-          break;
-        case "inventoryTooltip":
-          e.power = e.bwb_basePower * (1.1 ** item.bwb_level);
-          break;
-      }
+
+    switch (e.trigger) {
+      case "icon":
+        continue;
+      case "afterCalcManaPool":
+        let baseAmt = e.bwb_basePower - 1;
+        e.power = 1 + baseAmt * 1.1 ** item.bwb_level;
+        break;
+      default:
+      case "tick":
+        e.power = e.bwb_basePower * 1.1 ** item.bwb_level;
+        break;
     }
   }
 }
@@ -183,33 +191,35 @@ KDAdvanceLevel = function (...args) {
 
       // TODO: Some restraints cannot be locked, e.g. toys need a belt.
       if (r.item.bwb_level >= 5 && !r.item.lock) {
-        KinkyDungeonSendTextMessage(5, CheckedTextGet("BWB_LockUrge"), KDBasePink, 5);
+        KinkyDungeonSendTextMessage(
+          5,
+          CheckedTextGet("BWB_LockUrge"),
+          KDBasePink,
+          5
+        );
       }
     }
   }
   return retVal;
 };
 
-const TextKeys = Object.freeze({
-  BWB_Powerup_Generic:
-    "Your bond with the ${RestraintName} increased a little bit!",
-  BWB_Powerup_1st:
-    "As you've been wearing the ${RestraintName} for while, you start to get attached.",
-  BWB_Powerup_Low: "Your're getting used to wearing the ${RestraintName}.",
+const TextEnglish = {
+  BWB_Powerup_Generic: "Your bond with ${RestraintName} increased a little!",
+  BWB_Powerup_1st: "You've been wearing ${RestraintName} for a while.",
+  BWB_Powerup_Low: "You're getting used to wearing ${RestraintName}.",
   BWB_Powerup_Medium:
-    "The ${RestraintName} is starting to feel actually comfortable.",
+    "Wearing ${RestraintName} is starting to feel comfortable.",
   BWB_Powerup_High:
-    "Maybe it wouldn't even be so bad if you never took off the ${RestraintName}.",
+    "Maybe it wouldn't be so bad if you never took off ${RestraintName} ever again.",
   BWB_Powerup_XHigh:
-    "You feel like the ${RestraintName} is an actual part of your body.",
+    "You think of ${RestraintName} as an actual part of your body.",
   BWB_Powerup_TooHigh:
-    "You don't even remember what it was like not wearing the ${RestraintName} anymore.",
-  BWB_LockUrge:
-    "You feel an urge to lock it...",
-});
-type FlavorTextKey = keyof typeof TextKeys;
+    "You don't even remember what it was like not to wear ${RestraintName} anymore.",
+  BWB_LockUrge: "You feel an urge to lock it...",
+} as const;
+type FlavorTextKey = keyof typeof TextEnglish;
 
 function CheckedTextGet(key: FlavorTextKey, params: object = {}) {
   return TextGet(key, params);
 }
-Object.entries(TextKeys).forEach((e) => addTextKey(e[0], e[1]));
+Object.entries(TextEnglish).forEach((e) => addTextKey(e[0], e[1]));
