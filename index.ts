@@ -68,25 +68,42 @@
 // This safety measure will copy them back.
 
 /**
- * Stores the mod custom part of the restraints.
- * variantID -> data
+ * Copies the mod specific data from one restraint/variant to another.
+ * @param src
+ * @param dest
  */
-const customDataSafety = new Map<string, BWB_CustomData>();
+function cloneCustomDataTo(
+  src: BWB_WearableInstance,
+  dest: BWB_WearableInstance
+) {
+  console.debug('Copy:');
+  console.debug(src);
+  console.debug(dest);
+    dest.bwb_isNewRestraint = src.bwb_isNewRestraint;
+    dest.bwb_level = src.bwb_level;
+    dest.bwb_trueName = src.bwb_trueName;
+
+    src.events.forEach((e, i) => {
+      // This is a marker that we edited the power property.
+      if (!e.bwb_basePower) return;
+
+      dest.events[i].bwb_basePower = e.bwb_basePower;
+      dest.events[i].power = e.power;
+    });
+}
 
 /**
- * Makes a copy of the custom mod data.
+ * Ensures that the restraint specific data is kept in a proper place.
  * Make sure to call it every time you make changes to a restraint.
  * @param item
  */
 function keepRestraintDataSafe(item: BWB_WearableInstance) {
-  const customData: BWB_CustomData = {
-    bwb_isNewRestraint: item.bwb_isNewRestraint,
-    bwb_level: item.bwb_level,
-    bwb_trueName: item.bwb_trueName,
-  }
-  customDataSafety.set(item.inventoryVariant, customData);
+  const globalVariant = KinkyDungeonRestraintVariants[item.inventoryVariant];
+  cloneCustomDataTo(item, globalVariant);
+  //customDataSafety.set(item.inventoryVariant, customData);
 }
 
+//listenIn("KDDropItemInv");
 const Orig_KinkyDungeonInventoryAdd = KinkyDungeonInventoryAdd;
 // @ts-expect-error
 KinkyDungeonInventoryAdd = function (
@@ -103,11 +120,11 @@ KinkyDungeonInventoryAdd = function (
  * @param item
  */
 function assureRestraintDataCorrect(item: BWB_WearableInstance) {
-  const backup = customDataSafety.get(item.inventoryVariant);
+  const backup = //KDGetRestraintVariant
+    KinkyDungeonRestraintVariants[item.inventoryVariant] ||
+    KinkyDungeonRestraintVariants[item.name];
   if (!backup) return;
-  item.bwb_isNewRestraint = backup.bwb_isNewRestraint;
-  item.bwb_level = backup.bwb_level;
-  item.bwb_trueName = backup.bwb_trueName;
+  cloneCustomDataTo(backup, item);
 }
 
 if (!KDEventMapGeneric.postApply) KDEventMapGeneric.postApply = {};
@@ -122,6 +139,7 @@ KDEventMapGeneric.postApply.bwb_newRestraint = (
   // We don't care about generic items.
   if (!data.item.inventoryVariant) return;
   data.item.bwb_isNewRestraint = true;
+  keepRestraintDataSafe(data.item);
   console.debug(data.item);
 };
 
@@ -274,7 +292,9 @@ function commitRenaming(item: BWB_WearableInstance) {
   // Safetycheck
   if (item.inventoryVariant !== currentlyRenamingItem) {
     cancelRenaming();
-    throw new Error(`BWBMod: Error during renaming, ${item.inventoryVariant} != ${currentlyRenamingItem}`);
+    throw new Error(
+      `BWBMod: Error during renaming, ${item.inventoryVariant} != ${currentlyRenamingItem}`
+    );
   }
   item.bwb_trueName = newName.trim();
   keepRestraintDataSafe(item);
@@ -338,7 +358,6 @@ KinkyDungeonDrawInventorySelected = function (...args) {
         e.stopPropagation();
       });
       element.addEventListener("input", (e) => {
-        console.debug(e);
         newName = element.value;
       });
     }
@@ -407,3 +426,16 @@ declare function TextGet(key: FlavorTextKey, params?: object);
 // But I want to keep it in a separate file.
 // @ts-ignore
 Object.entries(TextEnglish).forEach((e) => addTextKey(e[0], e[1]));
+
+/**
+ * Helper function, prints the global functions's args to console every time it's called.
+ * @param funcname
+ */
+function listenIn(funcname: string) {
+  const origFunc = window[funcname];
+  window[funcname] = function (...args) {
+    console.debug("Listening in " + funcname);
+    console.debug(args);
+    return origFunc(...args);
+  };
+}

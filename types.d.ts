@@ -81,3 +81,5 @@ declare function KDTextField(name: string, left: number, top: number, width: num
 
 declare function ElementValue(id: string, value?: string): string;
 declare function KinkyDungeonInventoryAdd(item: BWB_WearableInstance, ...args: any[]):void;
+
+declare const KinkyDungeonRestraintVariants: Record<string, BWB_WearableInstance>;
