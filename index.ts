@@ -29,7 +29,6 @@
 
 /*
   TODO:
-  - Add all other enchantments
   - Finetune the stat increase, *1.1 seems alright for base.
     But be careful for class synergies, e.g.
       Toys + trainee is OP
@@ -39,8 +38,6 @@
   - Tightness can increase instead.
     Not b/c you cannot struggle out, but you don't want to
     Extra flavor text, if possible?
-  - If the "bonding level" is high enough, allow renaming the item
-    Override KDGetItemName()
 
   Flavor text:
     You reluctantly remove the ${RestraintName}.
@@ -54,14 +51,14 @@
 
   If you removed an item that already has some levels, and put it back:
     Min 5:
-      You can't help but notice that putting the ${RestraintName} on felt a little bit good...
+      You can't help but notice that putting the ${RestraintName} on felt a little good...
       Just in case.
     Min 10:
       You felt so lonely without the ${RestraintName}, but finally it's back!
       Nice and secure!
     Min 14:
-      How did the ${RestraintName} even get off? You promise that you'll never take it off again.
-      You promise that you'll never take it off again, and show your resolve with a nice little lock.
+      How did the ${RestraintName} even get off? You promise you'll never take it off again.
+      You feel much safer now!
 */
 
 if (!KDEventMapGeneric.postApply) KDEventMapGeneric.postApply = {};
@@ -90,7 +87,7 @@ function increaseRestraintLevel(item: Readonly<BWB_WearableInstance>) {
   modifyVariantData(item, (item) => {
     if (!item.bwb_level) {
       // New restraint the mod hasn't encountered before.
-      item.bwb_level = 1;
+      item.bwb_level = Base_Level;
     } else {
       item.bwb_level++;
     }
@@ -347,6 +344,8 @@ KDInventoryAction.BWBRename = {
 const Orig_restraint = KDInventoryActionsDefault.restraint;
 const Orig_looserestraint = KDInventoryActionsDefault.looserestraint;
 KDInventoryActionsDefault.restraint = (item) => {
+  // Worn restraints should always have their inventoryVariant set.
+  // If not, it's a mundane (or unique) restraint.
   const retVal = Orig_restraint(item);
   if (
     (item.inventoryVariant && Level_GiveName === 0) ||
@@ -357,9 +356,14 @@ KDInventoryActionsDefault.restraint = (item) => {
   return retVal;
 };
 KDInventoryActionsDefault.looserestraint = (item) => {
+  // Loose restraints however, are weird.
+  // Their properties depend on their source (uneqipped, or picked up)
   const retVal = Orig_looserestraint(item);
+  const itemTemplate = KDGetRestraintVariant(item);
+  if (!itemTemplate) return retVal;
+
   if (
-    (item.inventoryVariant && Level_GiveName === 0) ||
+    (Level_GiveName === 0) ||
     (item.bwb_level && item.bwb_level >= Level_GiveName)
   ) {
     retVal.push("BWBRename");
@@ -370,8 +374,20 @@ KDInventoryActionsDefault.looserestraint = (item) => {
 const Orig_KDGetItemName = KDGetItemName;
 // @ts-expect-error
 KDGetItemName = function (item: BWB_WearableInstance): string {
-  return item.bwb_trueName || Orig_KDGetItemName(item);
+  if (item && item.bwb_trueName) return item.bwb_trueName;
+  const template = KDGetRestraintVariant(item);
+  if (template && template.bwb_trueName) return template.bwb_trueName;
+  return Orig_KDGetItemName(item);
 };
+
+const Orig_KDGetItemNameString = KDGetItemNameString;
+// @ts-expect-error
+KDGetItemNameString = function(name: string): string {
+  // For this function call, the cast is OK.
+  const template = KDGetRestraintVariant({ name } as BWB_WearableInstance);
+  if (template && template.bwb_trueName) return template.bwb_trueName;
+  return Orig_KDGetItemNameString(name);
+}
 
 type FlavorTextKey = keyof typeof TextEnglish;
 

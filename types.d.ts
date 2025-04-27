@@ -83,6 +83,7 @@ declare function KDRestraint(
 ): Readonly<BWB_Wearable>;
 declare function addTextKey(name: string, text: string): void;
 declare function KDGetItemName(item: BWB_WearableInstance): string;
+declare function KDGetItemNameString(name: string): string;
 declare function KinkyDungeonSendTextMessage(
   priority: number,
   text: string,
