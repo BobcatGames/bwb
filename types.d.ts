@@ -80,3 +80,4 @@ declare let KinkyDungeonDrawState: string;
 declare function KDTextField(name: string, left: number, top: number, width: number, height: number, type?: string, value?: string, maxLength?: string): any;
 
 declare function ElementValue(id: string, value?: string): string;
+declare function KinkyDungeonInventoryAdd(item: BWB_WearableInstance, ...args: any[]):void;

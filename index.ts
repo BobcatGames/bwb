@@ -49,6 +49,9 @@
     You forlornly look at the remains of the ${RestraintName}...
     You try to cut the ${RestraintName}, but your hands stop before the last cut.
     You can't cut the ${RestraintName}... but do you really want to?
+
+  KinkyDungeonStruggle() might be good for the above.
+
   If you removed an item that already has some levels, and put it back:
     Min 5:
       You can't help but notice that putting the ${RestraintName} on felt a little bit good...
@@ -61,11 +64,58 @@
       You promise that you'll never take it off again, and show your resolve with a nice little lock.
 */
 
+// The main game sometimes clobbers over our custom data.
+// This safety measure will copy them back.
+
+/**
+ * Stores the mod custom part of the restraints.
+ * variantID -> data
+ */
+const customDataSafety = new Map<string, BWB_CustomData>();
+
+/**
+ * Makes a copy of the custom mod data.
+ * Make sure to call it every time you make changes to a restraint.
+ * @param item
+ */
+function keepRestraintDataSafe(item: BWB_WearableInstance) {
+  const customData: BWB_CustomData = {
+    bwb_isNewRestraint: item.bwb_isNewRestraint,
+    bwb_level: item.bwb_level,
+    bwb_trueName: item.bwb_trueName,
+  }
+  customDataSafety.set(item.inventoryVariant, customData);
+}
+
+const Orig_KinkyDungeonInventoryAdd = KinkyDungeonInventoryAdd;
+// @ts-expect-error
+KinkyDungeonInventoryAdd = function (
+  item: BWB_WearableInstance,
+  ...args: any[]
+) {
+  Orig_KinkyDungeonInventoryAdd(item, ...args);
+  assureRestraintDataCorrect(item);
+};
+
+/**
+ * Checks if we have a safety backup of the restraint.
+ * If yes, we copy them back.
+ * @param item
+ */
+function assureRestraintDataCorrect(item: BWB_WearableInstance) {
+  const backup = customDataSafety.get(item.inventoryVariant);
+  if (!backup) return;
+  item.bwb_isNewRestraint = backup.bwb_isNewRestraint;
+  item.bwb_level = backup.bwb_level;
+  item.bwb_trueName = backup.bwb_trueName;
+}
+
 if (!KDEventMapGeneric.postApply) KDEventMapGeneric.postApply = {};
 KDEventMapGeneric.postApply.bwb_newRestraint = (
   _e,
   data: KDEventData_PostApply
 ) => {
+  assureRestraintDataCorrect(data.item);
   // Truthy, if we're currently removing an item, and this one becomes the top.
   // In this case, we're not actually equipping anything new.
   if (data.UnLink) return;
@@ -119,6 +169,7 @@ function increaseRestraintLevel(item: BWB_WearableInstance) {
         break;
     }
   }
+  keepRestraintDataSafe(item);
 }
 
 let Orig_KDAdvanceLevel = KDAdvanceLevel;
@@ -137,6 +188,7 @@ KDAdvanceLevel = function (...args) {
       if (r.item.bwb_isNewRestraint) {
         // Clear the new reatraint flag, it's not new for the next level
         r.item.bwb_isNewRestraint = false;
+        keepRestraintDataSafe(r.item);
         continue;
       }
 
@@ -225,6 +277,7 @@ function commitRenaming(item: BWB_WearableInstance) {
     throw new Error(`BWBMod: Error during renaming, ${item.inventoryVariant} != ${currentlyRenamingItem}`);
   }
   item.bwb_trueName = newName.trim();
+  keepRestraintDataSafe(item);
   cancelRenaming();
 }
 
