@@ -6,6 +6,13 @@ const Level_Medium = 5;
 const Level_High = 10;
 const Level_XHigh = 14;
 
+/**
+ * The min. bond level needed to rename the item.
+ * Default is Level_Medium.
+ * Set to 0 to rename ALL enchanted items.
+ */
+let Level_GiveName = Level_Medium;
+
 const TextEnglish = {
   BWB_Powerup_Generic: "Your bond with ${RestraintName} increased a little!",
   BWB_Powerup_1st: "You've been wearing ${RestraintName} for a while.",

@@ -12,6 +12,7 @@
     "files": [
       "types.d.ts",
       "data.ts",
+      "keepitallsafe.ts",
       "index.ts"
     ]
 }

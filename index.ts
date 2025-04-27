@@ -64,137 +64,80 @@
       You promise that you'll never take it off again, and show your resolve with a nice little lock.
 */
 
-// The main game sometimes clobbers over our custom data.
-// This safety measure will copy them back.
-
-/**
- * Copies the mod specific data from one restraint/variant to another.
- * @param src
- * @param dest
- */
-function cloneCustomDataTo(
-  src: BWB_WearableInstance,
-  dest: BWB_WearableInstance
-) {
-  console.debug('Copy:');
-  console.debug(src);
-  console.debug(dest);
-    dest.bwb_isNewRestraint = src.bwb_isNewRestraint;
-    dest.bwb_level = src.bwb_level;
-    dest.bwb_trueName = src.bwb_trueName;
-
-    src.events.forEach((e, i) => {
-      // This is a marker that we edited the power property.
-      if (!e.bwb_basePower) return;
-
-      dest.events[i].bwb_basePower = e.bwb_basePower;
-      dest.events[i].power = e.power;
-    });
-}
-
-/**
- * Ensures that the restraint specific data is kept in a proper place.
- * Make sure to call it every time you make changes to a restraint.
- * @param item
- */
-function keepRestraintDataSafe(item: BWB_WearableInstance) {
-  const globalVariant = KinkyDungeonRestraintVariants[item.inventoryVariant];
-  cloneCustomDataTo(item, globalVariant);
-  //customDataSafety.set(item.inventoryVariant, customData);
-}
-
-//listenIn("KDDropItemInv");
-const Orig_KinkyDungeonInventoryAdd = KinkyDungeonInventoryAdd;
-// @ts-expect-error
-KinkyDungeonInventoryAdd = function (
-  item: BWB_WearableInstance,
-  ...args: any[]
-) {
-  Orig_KinkyDungeonInventoryAdd(item, ...args);
-  assureRestraintDataCorrect(item);
-};
-
-/**
- * Checks if we have a safety backup of the restraint.
- * If yes, we copy them back.
- * @param item
- */
-function assureRestraintDataCorrect(item: BWB_WearableInstance) {
-  const backup = //KDGetRestraintVariant
-    KinkyDungeonRestraintVariants[item.inventoryVariant] ||
-    KinkyDungeonRestraintVariants[item.name];
-  if (!backup) return;
-  cloneCustomDataTo(backup, item);
-}
-
 if (!KDEventMapGeneric.postApply) KDEventMapGeneric.postApply = {};
 KDEventMapGeneric.postApply.bwb_newRestraint = (
   _e,
   data: KDEventData_PostApply
 ) => {
+  // Technically, this line should belong in keepitallsafe.ts
   assureRestraintDataCorrect(data.item);
+
   // Truthy, if we're currently removing an item, and this one becomes the top.
   // In this case, we're not actually equipping anything new.
   if (data.UnLink) return;
   // We don't care about generic items.
   if (!data.item.inventoryVariant) return;
-  data.item.bwb_isNewRestraint = true;
-  keepRestraintDataSafe(data.item);
+
+  modifyVariantData(data.item, (item) => (item.bwb_isNewRestraint = true));
   console.debug(data.item);
 };
 
 /**
- * Increases the restraints bond level, and upgrades it's stats accordingly.
+ * Increases the restraint's bond level, and upgrades it's stats accordingly.
  * @param item
  */
-function increaseRestraintLevel(item: BWB_WearableInstance) {
-  if (!item.bwb_level) {
-    // New restraint the mod hasn't encountered before.
-    item.bwb_level = 1;
-  } else {
-    item.bwb_level++;
-  }
-
-  const enchantments = Object.keys(KDEventEnchantmentModular);
-  for (const e of item.events) {
-    // The events array contains other, non-enchantment related events (curses etc.)
-    if (!enchantments.includes(e.original)) continue;
-
-    // Nothing to upgrade
-    if (!e.power) continue;
-
-    if (!e.bwb_basePower) {
-      e.bwb_basePower = e.power;
+function increaseRestraintLevel(item: Readonly<BWB_WearableInstance>) {
+  modifyVariantData(item, (item) => {
+    if (!item.bwb_level) {
+      // New restraint the mod hasn't encountered before.
+      item.bwb_level = 1;
+    } else {
+      item.bwb_level++;
     }
 
-    // Calculate the new stats as function of the bond level and the base power of the enchantment.
-    // This way, we can avoid a bunch of floating point issues (might not be an issue, but still),
-    // and we can apply more complex functions.
+    const enchantments = Object.keys(KDEventEnchantmentModular);
+    for (const e of item.events) {
+      // The events array contains other, non-enchantment related events (curses etc.)
+      if (!enchantments.includes(e.original)) continue;
 
-    // Base: +10% stat per level
-    // Might be a bit too strong?
+      // Nothing to upgrade
+      if (!e.power) continue;
 
-    switch (e.trigger) {
-      case "icon":
-        continue;
-      case "afterCalcManaPool":
-        let baseAmt = e.bwb_basePower - 1;
-        e.power = 1 + baseAmt * 1.1 ** item.bwb_level;
-        break;
-      default:
-      case "tick":
-        e.power = e.bwb_basePower * 1.1 ** item.bwb_level;
-        break;
+      // This is the first time we're upgrading this item
+      if (!e.bwb_basePower) {
+        e.bwb_basePower = e.power;
+      }
+
+      // Calculate the new stats as function of the bond level and the base power of the enchantment.
+      // This way, we can avoid a bunch of floating point issues (might not be an issue, but still),
+      // and we can apply more complex functions.
+
+      // Base: +10% stat per level
+      // Might be a bit too strong?
+
+      switch (e.trigger) {
+        // The icon's "power" is used for something? Better no mess with it.
+        case "icon":
+          continue;
+        // For some reason, this event's power is not like the others, it's POW+1 instead of POW.
+        case "afterCalcManaPool":
+          let baseAmt = e.bwb_basePower - 1;
+          e.power = 1 + baseAmt * 1.1 ** item.bwb_level;
+          break;
+        default:
+        case "tick":
+          e.power = e.bwb_basePower * 1.1 ** item.bwb_level;
+          break;
+      }
     }
-  }
-  keepRestraintDataSafe(item);
+  });
 }
 
 let Orig_KDAdvanceLevel = KDAdvanceLevel;
 // @ts-expect-error
 KDAdvanceLevel = function (...args) {
   const retVal = Orig_KDAdvanceLevel(...args);
-  // Run the code AFTER advancing the level, that's when the level
+  // This code MUST be run AFTER advancing the level, that's when the level
   // variables will be correct
 
   if (MiniGameKinkyDungeonLevel > KDGameData.HighestLevelCurrent) {
@@ -204,9 +147,8 @@ KDAdvanceLevel = function (...args) {
     for (const r of wornRestraints) {
       // New restraints do not count, only for the next level
       if (r.item.bwb_isNewRestraint) {
-        // Clear the new reatraint flag, it's not new for the next level
-        r.item.bwb_isNewRestraint = false;
-        keepRestraintDataSafe(r.item);
+        // Clear the new restraint flag, it's not new for the next level
+        modifyVariantData(r.item, (item) => (item.bwb_isNewRestraint = false));
         continue;
       }
 
@@ -289,15 +231,14 @@ function cancelRenaming() {
  * @param item
  */
 function commitRenaming(item: BWB_WearableInstance) {
-  // Safetycheck
+  // Safety check
   if (item.inventoryVariant !== currentlyRenamingItem) {
     cancelRenaming();
     throw new Error(
       `BWBMod: Error during renaming, ${item.inventoryVariant} != ${currentlyRenamingItem}`
     );
   }
-  item.bwb_trueName = newName.trim();
-  keepRestraintDataSafe(item);
+  modifyVariantData(item, (item) => (item.bwb_trueName = newName.trim()));
   cancelRenaming();
 }
 
@@ -305,12 +246,16 @@ const Orig_KinkyDungeonRun = KinkyDungeonRun;
 // @ts-expect-error
 KinkyDungeonRun = function () {
   const retVal = Orig_KinkyDungeonRun();
+  // Cancel renaming if we switch screens
   if (KinkyDungeonDrawState !== "Inventory") {
-    isRenaming = false;
+    cancelRenaming();
   }
   return retVal;
 };
 
+// Technically, this function isn't the inventory screen...
+// But it's way easier to implement this way,
+// e.g. the currently selected item is provided to us.
 const Orig_KinkyDungeonDrawInventorySelected =
   KinkyDungeonDrawInventorySelected;
 // @ts-expect-error
@@ -326,6 +271,7 @@ KinkyDungeonDrawInventorySelected = function (...args) {
     // @ts-expect-error
     let y = canvasOffsetY_ui + 483 * KinkyDungeonBookScale - 5 + 52;
 
+    // Cancel renaming if we select another item
     if (selectedItem.inventoryVariant !== currentlyRenamingItem) {
       cancelRenaming();
       return retVal;
@@ -369,11 +315,12 @@ KDInventoryAction.BWBRename = {
   text: (_player, _item) => {
     return TextGet("BWB_InventoryAction_Rename");
   },
-  icon: (_player, item: BWB_WearableInstance) => {
+  icon: (_player, _item) => {
     if (isRenaming) {
       // Checkmark icon
       return "InventoryAction/Use";
     } else {
+      // I could use the captive rename icon, but this one stands out more
       return "Data/BWB_Rename";
     }
   },
@@ -396,18 +343,25 @@ KDInventoryAction.BWBRename = {
   },
 };
 
+// Maybe there's a cleaner way to do it, but it works
 const Orig_restraint = KDInventoryActionsDefault.restraint;
 const Orig_looserestraint = KDInventoryActionsDefault.looserestraint;
 KDInventoryActionsDefault.restraint = (item) => {
   const retVal = Orig_restraint(item);
-  if (item.bwb_level /*&& item.bwb_level >= Level_Medium*/) {
+  if (
+    (item.inventoryVariant && Level_GiveName === 0) ||
+    (item.bwb_level && item.bwb_level >= Level_GiveName)
+  ) {
     retVal.push("BWBRename");
   }
   return retVal;
 };
 KDInventoryActionsDefault.looserestraint = (item) => {
   const retVal = Orig_looserestraint(item);
-  if (item.bwb_level && item.bwb_level >= Level_Medium) {
+  if (
+    (item.inventoryVariant && Level_GiveName === 0) ||
+    (item.bwb_level && item.bwb_level >= Level_GiveName)
+  ) {
     retVal.push("BWBRename");
   }
   return retVal;
