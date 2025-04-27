@@ -76,7 +76,6 @@ KDEventMapGeneric.postApply.bwb_newRestraint = (
   if (!data.item.inventoryVariant) return;
 
   modifyVariantData(data.item, (item) => (item.bwb_isNewRestraint = true));
-  console.debug(data.item);
 };
 
 /**
@@ -138,9 +137,7 @@ KDAdvanceLevel = function (...args) {
   // variables will be correct
 
   if (MiniGameKinkyDungeonLevel > KDGameData.HighestLevelCurrent) {
-    console.debug("BWB: New floor");
     const wornRestraints = KinkyDungeonAllRestraintDynamic();
-    console.debug(wornRestraints);
     for (const r of wornRestraints) {
       // New restraints do not count, only for the next level
       if (r.item.bwb_isNewRestraint) {
@@ -397,15 +394,3 @@ declare function TextGet(key: FlavorTextKey, params?: object);
 // @ts-ignore
 Object.entries(TextEnglish).forEach((e) => addTextKey(e[0], e[1]));
 
-/**
- * Helper function, prints the global functions's args to console every time it's called.
- * @param funcname
- */
-function listenIn(funcname: string) {
-  const origFunc = window[funcname];
-  window[funcname] = function (...args) {
-    console.debug("Listening in " + funcname);
-    console.debug(args);
-    return origFunc(...args);
-  };
-}
