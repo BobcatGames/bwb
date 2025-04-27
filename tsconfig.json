@@ -1,20 +1,25 @@
 {
-    "compilerOptions": {
-        "lib": [
-          "ES2020",
-          "DOM"
-        ],
-        "target": "ES2020",
-        "typeRoots" : ["./types.d.ts"],
-        "outFile": "./dist/index.js",
-        "erasableSyntaxOnly": true,
-        "alwaysStrict": true
-    },
-    "files": [
-      "types.d.ts",
-      "data.ts",
-      "modhelpers.ts",
-      "keepitallsafe.ts",
-      "index.ts"
-    ]
+  "compilerOptions": {
+    "lib": ["ES2020", "DOM"],
+    "target": "ES2020",
+    "outFile": "./dist/index.js",
+    "erasableSyntaxOnly": true,
+    "alwaysStrict": true,
+    "typeRoots": [
+      "./KinkiestDungeon/node_modules/@types",
+      "./KinkiestDungeon/node_modules/@pixi"
+    ],
+    "moduleResolution": "node",
+    "skipLibCheck": true
+  },
+  "files": [
+    "KinkiestDungeon/Scripts/lib/LZString.d.ts",
+    "KinkiestDungeon/Scripts/Typedef.d.ts",
+    "KinkiestDungeon/out/main.d.ts",
+    "types.ts",
+    "data.ts",
+    "modhelpers.ts",
+    "keepitallsafe.ts",
+    "index.ts"
+  ]
 }

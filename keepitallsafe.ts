@@ -9,8 +9,8 @@
  * @param dest
  */
 function cloneCustomDataTo(
-  src: BWB_WearableInstance,
-  dest: BWB_WearableInstance
+  src: BWB_WearableInstance | BWB_VariantTemplate,
+  dest: BWB_WearableInstance | BWB_VariantTemplate
 ) {
   console.debug("Copy:");
   console.debug(src);
@@ -19,7 +19,7 @@ function cloneCustomDataTo(
   dest.bwb_level = src.bwb_level;
   dest.bwb_trueName = src.bwb_trueName;
 
-  src.events.forEach((e, i) => {
+  src.events.forEach((e: BWB_Event, i) => {
     // This is a marker that we edited the power property.
     if (!e.bwb_basePower) return;
 
@@ -50,7 +50,7 @@ function modifyVariantData(
  * @param item
  */
 function assureRestraintDataCorrect(item: BWB_WearableInstance) {
-  const backup = KDGetRestraintVariant(item);
+  const backup = KDGetRestraintVariant(item) as BWB_VariantTemplate;
   if (!backup) return;
   cloneCustomDataTo(backup, item);
 }

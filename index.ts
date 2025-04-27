@@ -69,8 +69,9 @@ KDEventMapGeneric.postApply.bwb_newRestraint = (
   _e,
   data: KDEventData_PostApply
 ) => {
+  const item = data.item as BWB_WearableInstance;
   // Technically, this line should belong in keepitallsafe.ts
-  assureRestraintDataCorrect(data.item);
+  assureRestraintDataCorrect(item);
 
   // Truthy, if we're currently removing an item, and this one becomes the top.
   // In this case, we're not actually equipping anything new.
@@ -78,7 +79,7 @@ KDEventMapGeneric.postApply.bwb_newRestraint = (
   // We don't care about generic items.
   if (!data.item.inventoryVariant) return;
 
-  modifyVariantData(data.item, (item) => (item.bwb_isNewRestraint = true));
+  modifyVariantData(item, (item) => (item.bwb_isNewRestraint = true));
 };
 
 /**
@@ -135,6 +136,7 @@ function increaseRestraintLevel(item: Readonly<BWB_WearableInstance>) {
 let Orig_KDAdvanceLevel = KDAdvanceLevel;
 // @ts-expect-error
 KDAdvanceLevel = function (...args) {
+  // @ts-expect-error Easier than typing out all arguments
   const retVal = Orig_KDAdvanceLevel(...args);
   // This code MUST be run AFTER advancing the level, that's when the level
   // variables will be correct
@@ -142,14 +144,15 @@ KDAdvanceLevel = function (...args) {
   if (MiniGameKinkyDungeonLevel > KDGameData.HighestLevelCurrent) {
     const wornRestraints = KinkyDungeonAllRestraintDynamic();
     for (const r of wornRestraints) {
+      const item = r.item as BWB_WearableInstance;
       // New restraints do not count, only for the next level
-      if (r.item.bwb_isNewRestraint) {
+      if (item.bwb_isNewRestraint) {
         // Clear the new restraint flag, it's not new for the next level
-        modifyVariantData(r.item, (item) => (item.bwb_isNewRestraint = false));
+        modifyVariantData(item, (item) => (item.bwb_isNewRestraint = false));
         continue;
       }
 
-      const baseRestraint = KDRestraint(r.item);
+      const baseRestraint = KDRestraint(item);
       // Armors don't count, no matter how enchanted they are.
       // TODO: check for mimic handling.
       if (baseRestraint.armor) continue;
@@ -159,12 +162,12 @@ KDAdvanceLevel = function (...args) {
       //       A bit extra stat buff?
       //if (!r.item.lock)
 
-      increaseRestraintLevel(r.item);
+      increaseRestraintLevel(item);
 
       const fullName = KDGetItemName(r.item);
       let flavorTextKey: FlavorTextKey;
       let color = KDBasePink;
-      switch (r.item.bwb_level) {
+      switch (item.bwb_level) {
         case Level_1:
           flavorTextKey = "BWB_Powerup_1st";
           break;
@@ -185,10 +188,7 @@ KDAdvanceLevel = function (...args) {
             "BWBMod: increaseRestraintLevel should have set bwb_level"
           );
         default:
-          if (
-            r.item.bwb_level >= Level_XHigh + 2 &&
-            r.item.bwb_level % 5 == 0
-          ) {
+          if (item.bwb_level >= Level_XHigh + 2 && item.bwb_level % 5 == 0) {
             flavorTextKey = "BWB_Powerup_TooHigh";
           } else {
             flavorTextKey = "BWB_Powerup_Generic";
@@ -202,7 +202,7 @@ KDAdvanceLevel = function (...args) {
       KinkyDungeonSendTextMessage(5, text, color, 5);
 
       // TODO: Some restraints cannot be locked, e.g. toys need a belt.
-      if (r.item.bwb_level >= 5 && !r.item.lock) {
+      if (item.bwb_level >= 5 && !r.item.lock) {
         KinkyDungeonSendTextMessage(5, TextGet("BWB_LockUrge"), KDBasePink, 5);
       }
     }
@@ -262,15 +262,14 @@ const Orig_KinkyDungeonDrawInventorySelected =
   KinkyDungeonDrawInventorySelected;
 // @ts-expect-error
 KinkyDungeonDrawInventorySelected = function (...args) {
+  // @ts-expect-error Easier than typing out all arguments
   const retVal = Orig_KinkyDungeonDrawInventorySelected(...args);
   if (retVal && isRenaming) {
     const selectedItem = args[0].item as BWB_WearableInstance;
     const xOffset = args[3] as number;
 
     // Copied from KinkyDungeonInventory.ts, KinkyDungeonDrawInventory()
-    // @ts-expect-error
     let x = canvasOffsetX_ui + xOffset + 640 * KinkyDungeonBookScale - 2 + 18;
-    // @ts-expect-error
     let y = canvasOffsetY_ui + 483 * KinkyDungeonBookScale - 5 + 52;
 
     // Cancel renaming if we select another item
@@ -281,9 +280,7 @@ KinkyDungeonDrawInventorySelected = function (...args) {
 
     let tf = KDTextField(
       "BWB_RenameTextField",
-      // @ts-expect-error
       x + KDInventoryActionSpacing * 2,
-      // @ts-expect-error
       y + KDInventoryActionSpacing,
       300,
       70,
@@ -332,7 +329,7 @@ KDInventoryAction.BWBRename = {
   show: (_player, _item) => {
     return true;
   },
-  click: (_player, item) => {
+  click: (_player, item: BWB_WearableInstance) => {
     if (isRenaming) {
       commitRenaming(item);
     } else {
@@ -348,7 +345,7 @@ KDInventoryAction.BWBRename = {
 // Maybe there's a cleaner way to do it, but it works
 const Orig_restraint = KDInventoryActionsDefault.restraint;
 const Orig_looserestraint = KDInventoryActionsDefault.looserestraint;
-KDInventoryActionsDefault.restraint = (item) => {
+KDInventoryActionsDefault.restraint = (item: BWB_WearableInstance) => {
   // Worn restraints should always have their inventoryVariant set.
   // If not, it's a mundane (or unique) restraint.
   const retVal = Orig_restraint(item);
@@ -360,7 +357,7 @@ KDInventoryActionsDefault.restraint = (item) => {
   }
   return retVal;
 };
-KDInventoryActionsDefault.looserestraint = (item) => {
+KDInventoryActionsDefault.looserestraint = (item: BWB_WearableInstance) => {
   // Loose restraints however, are weird.
   // Their properties depend on their source (uneqipped, or picked up)
   const retVal = Orig_looserestraint(item);
@@ -380,7 +377,7 @@ const Orig_KDGetItemName = KDGetItemName;
 // @ts-expect-error
 KDGetItemName = function (item: BWB_WearableInstance): string {
   if (item && item.bwb_trueName) return item.bwb_trueName;
-  const template = KDGetRestraintVariant(item);
+  const template = KDGetRestraintVariant(item) as BWB_VariantTemplate;
   if (template && template.bwb_trueName) return template.bwb_trueName;
   return Orig_KDGetItemName(item);
 };
@@ -389,7 +386,7 @@ const Orig_KDGetItemNameString = KDGetItemNameString;
 // @ts-expect-error
 KDGetItemNameString = function (name: string): string {
   // For this function call, the cast is OK.
-  const template = KDGetRestraintVariant({ name } as BWB_WearableInstance);
+  const template = KDGetRestraintVariant({ name } as BWB_WearableInstance) as BWB_VariantTemplate;
   if (template && template.bwb_trueName) return template.bwb_trueName;
   return Orig_KDGetItemNameString(name);
 };
