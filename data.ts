@@ -11,14 +11,14 @@ const Level_XHigh = 14;
  * Default is Level_Medium.
  * Set to 0 to rename ALL enchanted items.
  */
-let Level_GiveName = 0;
+let Level_GiveName = Level_Medium;
 
 /**
  * For debugging.
  * After completeing a floor, the starting bond level will be this.
  * Default is 1.
  */
-let Base_Level = 5;
+let Base_Level = 1;
 
 const TextEnglish = {
   BWB_Powerup_Generic: "Your bond with ${RestraintName} increased a little!",
@@ -33,6 +33,10 @@ const TextEnglish = {
   BWB_Powerup_TooHigh:
     "You don't even remember what it was like not to wear ${RestraintName} anymore.",
   BWB_LockUrge: "You feel an urge to lock it...",
+
+  BWB_SelfLock_Medium: "You lock ${RestraintName}, just in case.",
+  BWB_SelfLock_High: "You lock ${RestraintName}, nice and secure!",
+  BWB_SelfLock_XHigh: "You lock ${RestraintName}, you feel much safer now!",
 
   BWB_InventoryAction_Rename: "Give it a name (empty to reset)",
 } as const;

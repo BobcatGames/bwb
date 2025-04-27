@@ -61,7 +61,7 @@ declare const MiniGameKinkyDungeonLevel: number;
 declare const KDGameData: {
   HighestLevelCurrent: number;
 };
-declare const KDInventoryAction: Record<string, object>;
+declare const KDInventoryAction: Record<string, any>;
 declare const KDEventEnchantmentModular: Record<string, any>;
 declare const KDInventoryActionsDefault: Record<
   string,

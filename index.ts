@@ -52,14 +52,17 @@
   If you removed an item that already has some levels, and put it back:
     Min 5:
       You can't help but notice that putting the ${RestraintName} on felt a little good...
-      Just in case.
+
     Min 10:
       You felt so lonely without the ${RestraintName}, but finally it's back!
-      Nice and secure!
+
     Min 14:
       How did the ${RestraintName} even get off? You promise you'll never take it off again.
-      You feel much safer now!
+
 */
+
+// #region Levelling up and keeping track
+// **************************************
 
 if (!KDEventMapGeneric.postApply) KDEventMapGeneric.postApply = {};
 KDEventMapGeneric.postApply.bwb_newRestraint = (
@@ -206,6 +209,11 @@ KDAdvanceLevel = function (...args) {
   }
   return retVal;
 };
+
+// #endregion
+
+// #region Renaming
+// ****************
 
 let isRenaming = false;
 let currentlyRenamingItem = "";
@@ -360,7 +368,7 @@ KDInventoryActionsDefault.looserestraint = (item) => {
   if (!itemTemplate) return retVal;
 
   if (
-    (Level_GiveName === 0) ||
+    Level_GiveName === 0 ||
     (item.bwb_level && item.bwb_level >= Level_GiveName)
   ) {
     retVal.push("BWBRename");
@@ -379,12 +387,40 @@ KDGetItemName = function (item: BWB_WearableInstance): string {
 
 const Orig_KDGetItemNameString = KDGetItemNameString;
 // @ts-expect-error
-KDGetItemNameString = function(name: string): string {
+KDGetItemNameString = function (name: string): string {
   // For this function call, the cast is OK.
   const template = KDGetRestraintVariant({ name } as BWB_WearableInstance);
   if (template && template.bwb_trueName) return template.bwb_trueName;
   return Orig_KDGetItemNameString(name);
-}
+};
+
+// #endregion
+
+// #region Flavor for locking
+// **************************
+
+const Orig_Lockclick = KDInventoryAction.Lock.click;
+KDInventoryAction.Lock.click = (e, item: Readonly<BWB_WearableInstance>) => {
+  Orig_Lockclick(e, item);
+  if (!item.bwb_level) return;
+
+  let textKey: FlavorTextKey;
+  if (item.bwb_level >= Level_XHigh) {
+    textKey = "BWB_SelfLock_XHigh";
+  } else if (item.bwb_level >= Level_High) {
+    textKey = "BWB_SelfLock_High";
+  } else if (item.bwb_level >= Level_Medium) {
+    textKey = "BWB_SelfLock_Medium";
+  }
+  if (textKey) {
+    KinkyDungeonSendTextMessage(5, TextGet(textKey, { RestraintName: KDGetItemName(item) }), KDBasePink, 2);
+  }
+};
+
+// #endregion
+
+// #region i18n
+// ************
 
 type FlavorTextKey = keyof typeof TextEnglish;
 
@@ -394,3 +430,4 @@ declare function TextGet(key: FlavorTextKey, params?: object);
 // @ts-ignore
 Object.entries(TextEnglish).forEach((e) => addTextKey(e[0], e[1]));
 
+// #endregion
