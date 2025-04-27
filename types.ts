@@ -1,18 +1,7 @@
-// This is a subset of the KD types, with only the relevant properties,
-// extended with the mod specific properties/types.
-// All mod-specific stuff must be nullable.
-
-// The best would be if we could generate a .d.ts file during the KD build process,
-// but for now, this is enough.
-
-/**
- * Restraints, armors, toys etc.
- */
-interface BWB_Wearable {
-  /** The "slot" where the item is worn */
-  Group: string;
-  armor?: boolean;
-}
+// These type interface with the KD types, allowing to extend them with
+// mod specific properties.
+// All mod-specific stuff must be nullable, so that the mod can work with
+// objects that come from the vanilla game.
 
 interface BWB_CustomItemData {
   /** The restraint was equipped this floor. */

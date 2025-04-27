@@ -3,13 +3,9 @@
 /*
   The overall algorithm:
 
-  At the end of every floor, we must check whether restraints were removed on this floor.
-  The game does not store the history, and catching every possible way an item can be removed/unequipped
-  (manually, shrine, shopkeep, offers...) is daunting, and would probably be buggy.
-  A check still must happen somehow, however.
+  At the end of every floor, we must check whether a specific restraint was equipped during the whole floor.
 
-  Instead, we override the AddRestraint function, listen in for adding attempts,
-  and mark newly added restraints.
+  The easiest way to do this is to listen in for restraint adding attempts, and mark newly added restraints.
   It doesn't matter if the equipping ended in a failure, or the item wasn't even a proper
   restraint, the algorithm will still work.
 

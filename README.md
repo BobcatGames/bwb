@@ -1,9 +1,71 @@
 
-## Bonding with bondage
+## Bonding with Bondage
 
 A mod for Kinky Dungeon (https://ada18980.itch.io/kinky-dungeon/ https://github.com/Ada18980/KinkiestDungeon/), by Strait Laced Games LLC.
 
-Adds a new game mechanic where you gain extra echancement stats if you wear a piece of restraint during a whole floor, and don't take it off even once.
+[Download it from here.](https://github.com/BobcatGames/bwb/releases)
+
+## What is the mod about?
+
+It adds a new game mechanic where you gain extra echancement stats if you wear a piece of restraint during a whole floor, and don't take it off even once, implying that the character is getting emotionally atttached, and/or magically attuned to it. Wearing one for a long time might have other effects too. For example, have you ever thought about giving your favorite toy a cute name? (instead of "Epic Massagers of Warding (Cursed)", you could just call it "Buzzy").
+
+The mod only affects Enchanted (and cursed) restraints. It has na effect on:
+
+* Weapons
+* Armor
+* Generic restraints
+* Uniquie restraints (like the potion absorber, ancient restraints etc.)
+
+Equally for balance, thematic, and technical reasons.
+
+### What counts as a whole floor?
+
+From leaving a perk room, to leaving the next one (when the floor number increments).
+
+New Game+ also counts.
+
+### Does saving work?
+
+Yes! The save code/file should contain every bit of info. The saves generated should also be loadable in the vanilla game, but of course, the mod specific info (unique name, the time you've been wearing the specific restraint etc.) might be lost.
+
+### Can I search for the item by it's custom name?
+
+Yes, and I didn't even had to add a single of code, it just worked! Thanks Ada!
+
+### What are the exact effects of levelling up your "bond" with the item?
+
+Try the mod to find out 🙂. But as this mod is intended for longer runs, if you don't have that much time or patience, here's the quick rundown.
+
+<details>
+  <summary>Spoilers (click to open)</summary>
+
+  * You have to wear the restraint during the whole floor, you cannot take it off even once.
+  * If you manage to do it, the numeric stats will increase by 10% (e.g. from +50% accuracy to +55%). Let's call it the "bond level", the number of floors cleared this way.
+  * If you (or someone) takes it off, the bonus for this floor will be lost (your bond level won't increase), but all past bonuses will remain (it won't decrease either). Just equip it back an continue.
+  * If you reach bond level 5, you'll be able to rename the item from the inventory menu.
+  * Extra flavor text if you apply a lock.
+
+  Plans:
+
+  * If you clear a floor while it was locked, maybe add an extra bit of bonus.
+  * The higher the bond level is, the harder it is to take it off. Not because you can't, but because you don't want to.
+
+  **Can't I just rename everything without waiting that many floors?**
+
+  You want the rewards without playing the game, huh? JK.
+
+  Unpack the mod, and edit the index.ks file with a text editor (NOT a word processor, like MS Word). Even nodepad is fine.
+
+  You'll find a line close to the top:
+
+    let Level_GiveName = Level_Medium;
+
+  Change Level_Medium to 0, like this:
+
+    let Level_GiveName = 0;
+
+  Copy index.ks back to the zip file, and you'll be able to rename every enchanted restraint.
+</details>
 
 ## Licence
 
@@ -11,15 +73,40 @@ You may freely make derivative works based on this mod, as long as you comply wi
 
 ## Building
 
-Needs a recent NodeJS version, and 7zip in the path.
+This mod is written in TypeScript, just like the base game. Not only that, it actually uses the base code for type checking.
+
+For the whole build process, you'll need a recent NodeJS version, and 7zip in the PATH.
+
+First, build the base game. We only need the types, but we need the node_modules:
+
+    git submodule init
+    git submodule update
+    cd KinkiestDungeon
+    npm install
+    npx tsc --declaration --emitDeclarationOnly
+    cd ..
+
+Then, in main project:
 
     npm install
     npm run build      # Linux, MacOS, Win+Bash
     npm run build:win  # Win (cmd or powershell)
 
-If you don't have 7zip:
+If you don't have 7zip install, you can do this instead:
 
     npm install
     npx tsc
 
-Then zip up the dist/index.js (rename to .ks if needed) and the mod.json files.
+Then zip up the relevant files:
+
+ * dist/index.js (rename to .ks if needed)
+ * mod.json
+ * the Data folder
+
+## Contributing, bug reporting
+
+For the time being, the KD discord is the main platform, the appropritate mod-* channels (I mean, how else did you find this mod?). Once I'm ready to publish it on itch, it might change.
+
+Translations are welcome! There's not much text currently, all can be found in data.ts.
+
+Found a bug? Open a bug report on the KD discord. Make sure to include the error log (if any) and a save file, just like you'd report an error in the base game.
