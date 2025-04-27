@@ -3,13 +3,13 @@
 
 A mod for Kinky Dungeon (https://ada18980.itch.io/kinky-dungeon/ https://github.com/Ada18980/KinkiestDungeon/), by Strait Laced Games LLC.
 
-[Download it from here.](https://github.com/BobcatGames/bwb/releases)
+[Download it from here](https://github.com/BobcatGames/bwb/releases)
 
 ## What is the mod about?
 
-It adds a new game mechanic where you gain extra echancement stats if you wear a piece of restraint during a whole floor, and don't take it off even once, implying that the character is getting emotionally atttached, and/or magically attuned to it. Wearing one for a long time might have other effects too. For example, have you ever thought about giving your favorite toy a cute name? (instead of "Epic Massagers of Warding (Cursed)", you could just call it "Buzzy").
+It adds a new game mechanic where you gain extra enchantment stats if you wear a piece of restraint during a whole floor, and don't take it off even once, implying that the character is getting emotionally atttached, and/or magically attuned to it. Wearing one for a long time might have other effects too. For example, have you ever thought about giving your favorite toy a cute name? (instead of "Epic Massagers of Warding (Cursed)", you could just call it "Buzzy").
 
-The mod only affects Enchanted (and cursed) restraints. It has na effect on:
+The mod only affects Enchanted (and cursed) restraints. It has no effect on:
 
 * Weapons
 * Armor
