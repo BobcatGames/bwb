@@ -156,19 +156,19 @@ KDAdvanceLevel = function (...args) {
       let flavorTextKey: FlavorTextKey;
       let color = KDBasePink;
       switch (r.item.bwb_level) {
-        case 1:
+        case Level_1:
           flavorTextKey = "BWB_Powerup_1st";
           break;
-        case 2:
+        case Level_Low:
           flavorTextKey = "BWB_Powerup_Low";
           break;
-        case 5:
+        case Level_Medium:
           flavorTextKey = "BWB_Powerup_Medium";
           break;
-        case 10:
+        case Level_High:
           flavorTextKey = "BWB_Powerup_High";
           break;
-        case 14:
+        case Level_XHigh:
           flavorTextKey = "BWB_Powerup_XHigh";
           break;
         case undefined:
@@ -176,7 +176,10 @@ KDAdvanceLevel = function (...args) {
             "BWBMod: increaseRestraintLevel should have set bwb_level"
           );
         default:
-          if (r.item.bwb_level > 15 && r.item.bwb_level % 5 == 0) {
+          if (
+            r.item.bwb_level >= Level_XHigh + 2 &&
+            r.item.bwb_level % 5 == 0
+          ) {
             flavorTextKey = "BWB_Powerup_TooHigh";
           } else {
             flavorTextKey = "BWB_Powerup_Generic";
@@ -191,13 +194,100 @@ KDAdvanceLevel = function (...args) {
 
       // TODO: Some restraints cannot be locked, e.g. toys need a belt.
       if (r.item.bwb_level >= 5 && !r.item.lock) {
-        KinkyDungeonSendTextMessage(
-          5,
-          TextGet("BWB_LockUrge"),
-          KDBasePink,
-          5
-        );
+        KinkyDungeonSendTextMessage(5, TextGet("BWB_LockUrge"), KDBasePink, 5);
       }
+    }
+  }
+  return retVal;
+};
+
+let isRenaming = false;
+let currentlyRenamingItem = "";
+let newName = "";
+
+/**
+ * Resets the renaming procedure, e.g. when the user clicks away.
+ */
+function cancelRenaming() {
+  isRenaming = false;
+  currentlyRenamingItem = "";
+  newName = "";
+}
+
+/**
+ * Performs the renaming.
+ * @param item
+ */
+function commitRenaming(item: BWB_WearableInstance) {
+  // Safetycheck
+  if (item.inventoryVariant !== currentlyRenamingItem) {
+    cancelRenaming();
+    throw new Error(`BWBMod: Error during renaming, ${item.inventoryVariant} != ${currentlyRenamingItem}`);
+  }
+  item.bwb_trueName = newName.trim();
+  cancelRenaming();
+}
+
+const Orig_KinkyDungeonRun = KinkyDungeonRun;
+// @ts-expect-error
+KinkyDungeonRun = function () {
+  const retVal = Orig_KinkyDungeonRun();
+  if (KinkyDungeonDrawState !== "Inventory") {
+    isRenaming = false;
+  }
+  return retVal;
+};
+
+const Orig_KinkyDungeonDrawInventorySelected =
+  KinkyDungeonDrawInventorySelected;
+// @ts-expect-error
+KinkyDungeonDrawInventorySelected = function (...args) {
+  const retVal = Orig_KinkyDungeonDrawInventorySelected(...args);
+  if (retVal && isRenaming) {
+    const selectedItem = args[0].item as BWB_WearableInstance;
+    const xOffset = args[3] as number;
+
+    // Copied from KinkyDungeonInventory.ts, KinkyDungeonDrawInventory()
+    // @ts-expect-error
+    let x = canvasOffsetX_ui + xOffset + 640 * KinkyDungeonBookScale - 2 + 18;
+    // @ts-expect-error
+    let y = canvasOffsetY_ui + 483 * KinkyDungeonBookScale - 5 + 52;
+
+    if (selectedItem.inventoryVariant !== currentlyRenamingItem) {
+      cancelRenaming();
+      return retVal;
+    }
+
+    let tf = KDTextField(
+      "BWB_RenameTextField",
+      // @ts-expect-error
+      x + KDInventoryActionSpacing * 2,
+      // @ts-expect-error
+      y + KDInventoryActionSpacing,
+      300,
+      70,
+      "text",
+      "",
+      "60"
+    );
+    if (tf.Created) {
+      const element = tf.Element as HTMLInputElement;
+      element.value = KDGetItemName(selectedItem);
+      // Prevents the game loop from "handling" keypresses as shortcuts
+      // Might be a good idea to merge it into the game core, into the KDTextField function.
+      element.addEventListener("keydown", (e) => {
+        e.stopPropagation();
+        if (e.key === "Enter") {
+          commitRenaming(selectedItem);
+        }
+      });
+      element.addEventListener("keyup", (e) => {
+        e.stopPropagation();
+      });
+      element.addEventListener("input", (e) => {
+        console.debug(e);
+        newName = element.value;
+      });
     }
   }
   return retVal;
@@ -207,17 +297,27 @@ KDInventoryAction.BWBRename = {
   text: (_player, _item) => {
     return TextGet("BWB_InventoryAction_Rename");
   },
-  icon: (_player, item) => {
-    return "InventoryAction/Use";
+  icon: (_player, item: BWB_WearableInstance) => {
+    if (isRenaming) {
+      // Checkmark icon
+      return "InventoryAction/Use";
+    } else {
+      return "Data/BWB_Rename";
+    }
   },
   valid: (_player, _item) => {
     return true;
   },
-  show: (_player, item) => {
+  show: (_player, _item) => {
     return true;
   },
-  click: (player, item) => {
-    // Rename dialog
+  click: (_player, item) => {
+    if (isRenaming) {
+      commitRenaming(item);
+    } else {
+      isRenaming = true;
+      currentlyRenamingItem = item.inventoryVariant;
+    }
   },
   cancel: (_player, _delta) => {
     return false; // NA for default actions
@@ -225,31 +325,32 @@ KDInventoryAction.BWBRename = {
 };
 
 const Orig_restraint = KDInventoryActionsDefault.restraint;
+const Orig_looserestraint = KDInventoryActionsDefault.looserestraint;
 KDInventoryActionsDefault.restraint = (item) => {
   const retVal = Orig_restraint(item);
-  if (item.bwb_level) {
+  if (item.bwb_level /*&& item.bwb_level >= Level_Medium*/) {
+    retVal.push("BWBRename");
+  }
+  return retVal;
+};
+KDInventoryActionsDefault.looserestraint = (item) => {
+  const retVal = Orig_looserestraint(item);
+  if (item.bwb_level && item.bwb_level >= Level_Medium) {
     retVal.push("BWBRename");
   }
   return retVal;
 };
 
-const TextEnglish = {
-  BWB_Powerup_Generic: "Your bond with ${RestraintName} increased a little!",
-  BWB_Powerup_1st: "You've been wearing ${RestraintName} for a while.",
-  BWB_Powerup_Low: "You're getting used to wearing ${RestraintName}.",
-  BWB_Powerup_Medium:
-    "Wearing ${RestraintName} is starting to feel comfortable. Why not give it a name? (in inventory)",
-  BWB_Powerup_High:
-    "Maybe it wouldn't be so bad if you never took off ${RestraintName} ever again.",
-  BWB_Powerup_XHigh:
-    "You think of ${RestraintName} as an actual part of your body.",
-  BWB_Powerup_TooHigh:
-    "You don't even remember what it was like not to wear ${RestraintName} anymore.",
-  BWB_LockUrge: "You feel an urge to lock it...",
+const Orig_KDGetItemName = KDGetItemName;
+// @ts-expect-error
+KDGetItemName = function (item: BWB_WearableInstance): string {
+  return item.bwb_trueName || Orig_KDGetItemName(item);
+};
 
-  BWB_InventoryAction_Rename: "Give it a name",
-} as const;
 type FlavorTextKey = keyof typeof TextEnglish;
 
 declare function TextGet(key: FlavorTextKey, params?: object);
+// For some reason, TS complains about TextEnglish being used before the declaration.
+// But I want to keep it in a separate file.
+// @ts-ignore
 Object.entries(TextEnglish).forEach((e) => addTextKey(e[0], e[1]));

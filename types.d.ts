@@ -11,7 +11,17 @@ interface BWB_Wearable {
   armor?: boolean;
 }
 
-interface BWB_WearableInstance {
+interface BWB_CustomData {
+  // Extra stuff must be nullable
+  /** The restraint was equipped this floor. */
+  bwb_isNewRestraint?: boolean;
+  /** The number of completed floors with the restraint equipped. */
+  bwb_level?: number;
+  /** The true, player-chosen name of the item */
+  bwb_trueName?: string;
+}
+
+interface BWB_WearableInstance extends BWB_CustomData {
   name: string;
   lock: string;
   inventoryVariant: string;
@@ -23,12 +33,6 @@ interface BWB_WearableInstance {
     /** The original power, before the level ups. */
     bwb_basePower?: number;
   }[];
-
-  // Extra stuff must be nullable
-  /** The restraint was equipped this floor. */
-  bwb_isNewRestraint?: boolean;
-  /** The number of completed floors with the restraint equipped. */
-  bwb_level?: number;
 }
 
 type KDEventData_PostApply = {
@@ -70,3 +74,9 @@ declare const KDInventoryAction: Record<string, object>;
 
 declare const KDEventEnchantmentModular: Record<string, any>;
 declare const KDInventoryActionsDefault: Record<string, (item: BWB_WearableInstance) => string[]>;
+declare function KinkyDungeonRun(): boolean;
+declare function KinkyDungeonDrawInventorySelected(...args: any[]): boolean;
+declare let KinkyDungeonDrawState: string;
+declare function KDTextField(name: string, left: number, top: number, width: number, height: number, type?: string, value?: string, maxLength?: string): any;
+
+declare function ElementValue(id: string, value?: string): string;
