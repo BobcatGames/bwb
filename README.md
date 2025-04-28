@@ -43,12 +43,13 @@ Try the mod to find out 🙂. But as this mod is intended for longer runs, if yo
   * If you manage to do it, the numeric stats will increase by 10% (e.g. from +50% accuracy to +55%). Let's call it the "bond level", the number of floors cleared this way.
   * If you (or someone) takes it off, the bonus for this floor will be lost (your bond level won't increase), but all past bonuses will remain (it won't decrease either). Just equip it back an continue.
   * If you reach bond level 5, you'll be able to rename the item from the inventory menu.
+  * Even later on, you'll lose the ability to cut, then struggle, then unlock/uneqip: the character doesn't want to harm it, or even take it off.
+    * It can always be removed with shrines, scrolls (for toys), and shopkeep.
   * Extra flavor text if you apply a lock.
 
   Plans:
 
   * If you clear a floor while it was locked, maybe add an extra bit of bonus.
-  * The higher the bond level is, the harder it is to take it off. Not because you can't, but because you don't want to.
 
   **Can't I just rename everything without waiting that many floors?**
 

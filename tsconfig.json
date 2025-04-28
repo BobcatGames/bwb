@@ -18,6 +18,7 @@
     "KinkiestDungeon/out/main.d.ts",
     "types.ts",
     "data.ts",
+    "i18n.ts",
     "modhelpers.ts",
     "keepitallsafe.ts",
     "index.ts"

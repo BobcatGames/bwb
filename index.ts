@@ -14,7 +14,7 @@
    * If the item was equipped this floor, it will be marked.
    * It it doesn't have a mark:
     * It was equipped on a prev. floor OR
-    * It was equipped before installing this mod.
+    * It was equipped bef7ore installing this mod.
   We can't really do much about the latter case, so we'll just let it slide.
 
   We do the magic, and then unmark all.
@@ -29,21 +29,6 @@
     But be careful for class synergies, e.g.
       Toys + trainee is OP
       Hands + warrior can be crippling
-
-  Ideas:
-  - Tightness can increase instead.
-    Not b/c you cannot struggle out, but you don't want to
-    Extra flavor text, if possible?
-
-  Flavor text:
-    You reluctantly remove the ${RestraintName}.
-    You begin to remove the ${RestraintName}, but change your mind halfway through.
-    You can't remove the ${RestraintName}... but do you really want to?
-    You forlornly look at the remains of the ${RestraintName}...
-    You try to cut the ${RestraintName}, but your hands stop before the last cut.
-    You can't cut the ${RestraintName}... but do you really want to?
-
-  KinkyDungeonStruggle() might be good for the above.
 
   If you removed an item that already has some levels, and put it back:
     Min 5:
@@ -184,7 +169,7 @@ KDAdvanceLevel = function (...args) {
             "BWBMod: increaseRestraintLevel should have set bwb_level"
           );
         default:
-          if (item.bwb_level >= Level_XHigh + 2 && item.bwb_level % 5 == 0) {
+          if (item.bwb_level >= Level_XHigh + 2 && item.bwb_level % 3 == 0) {
             flavorTextKey = "BWB_Powerup_TooHigh";
           } else {
             flavorTextKey = "BWB_Powerup_Generic";
@@ -192,14 +177,14 @@ KDAdvanceLevel = function (...args) {
           }
           break;
       }
-      const text = TextGet(flavorTextKey, {
+      const text = BWB_TextGet(flavorTextKey, {
         RestraintName: fullName,
       });
       KinkyDungeonSendTextMessage(5, text, color, 5);
 
       // TODO: Some restraints cannot be locked, e.g. toys need a belt.
       if (item.bwb_level >= 5 && !r.item.lock) {
-        KinkyDungeonSendTextMessage(5, TextGet("BWB_LockUrge"), KDBasePink, 5);
+        KinkyDungeonSendTextMessage(5, BWB_TextGet("BWB_LockUrge"), KDBasePink, 5);
       }
     }
   }
@@ -308,7 +293,7 @@ KinkyDungeonDrawInventorySelected = function (...args) {
 
 KDInventoryAction.BWBRename = {
   text: (_player, _item) => {
-    return TextGet("BWB_InventoryAction_Rename");
+    return BWB_TextGet("BWB_InventoryAction_Rename");
   },
   icon: (_player, _item) => {
     if (isRenaming) {
@@ -406,21 +391,64 @@ KDInventoryAction.Lock.click = (e, item: Readonly<BWB_WearableInstance>) => {
     textKey = "BWB_SelfLock_Medium";
   }
   if (textKey) {
-    KinkyDungeonSendTextMessage(5, TextGet(textKey, { RestraintName: KDGetItemName(item) }), KDBasePink, 2);
+    KinkyDungeonSendTextMessage(5, BWB_TextGet(textKey, { RestraintName: KDGetItemName(item) }), KDBasePink, 2);
   }
 };
 
 // #endregion
 
-// #region i18n
-// ************
+// #region Stop removing
+// *********************
 
-type FlavorTextKey = keyof typeof TextEnglish;
+const Orig_KinkyDungeonStruggle = KinkyDungeonStruggle;
+globalThis.KinkyDungeonStruggle = function(struggleGroup: string, StruggleType: string, index: number, query: boolean = false, retData?: KDStruggleData) {
+  let restraint = KinkyDungeonGetRestraintItem(struggleGroup) as BWB_WearableInstance;
+  if (!query && restraint.bwb_level) {
+    if (restraint.bwb_level > Level_StopRemove && (
+      StruggleType === 'Remove' || StruggleType === 'Unlock'
+    )) {
+      KinkyDungeonSendTextMessage(5, BWB_TextGet("BWB_NoRemove", { RestraintName: KDGetItemName(restraint) }), KDBasePink, 2);
+      return "Fail";
+    }
+    if (restraint.bwb_level > Level_StopCut && StruggleType === 'Cut') {
+      KinkyDungeonSendTextMessage(
+        5,
+        BWB_TextGet("BWB_NoCut", { RestraintName: KDGetItemName(restraint) }),
+        KDBasePink,
+        2
+      );
+      return "Fail";
+    }
+    if (
+      restraint.bwb_level > Level_StopStruggle &&
+      StruggleType === "Struggle"
+    ) {
+      KinkyDungeonSendTextMessage(
+        5,
+        BWB_TextGet("BWB_NoStruggle", {
+          RestraintName: KDGetItemName(restraint),
+        }),
+        KDBasePink,
+        2
+      );
+      return "Fail";
+    }
+  }
+  return Orig_KinkyDungeonStruggle(struggleGroup, StruggleType, index, query, retData);
+}
 
-declare function TextGet(key: FlavorTextKey, params?: object);
-// For some reason, TS complains about TextEnglish being used before the declaration.
-// But I want to keep it in a separate file.
-// @ts-ignore
-Object.entries(TextEnglish).forEach((e) => addTextKey(e[0], e[1]));
+const Orig_RemoveMagicLockActionClick = KDInventoryAction.RemoveMagicLock.click;
+KDInventoryAction.RemoveMagicLock.click = (e, item: BWB_WearableInstance) => {
+  if (item.bwb_level && item.bwb_level >= Level_StopRemove) {
+    KinkyDungeonSendTextMessage(
+      5,
+      BWB_TextGet("BWB_NoUnlock", { RestraintName: KDGetItemName(item) }),
+      KDBasePink,
+      2
+    );
+  } else {
+    return Orig_RemoveMagicLockActionClick(e, item);
+  }
+};
 
 // #endregion
