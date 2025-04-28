@@ -403,7 +403,7 @@ KDInventoryAction.Lock.click = (e, item: Readonly<BWB_WearableInstance>) => {
 const Orig_KinkyDungeonStruggle = KinkyDungeonStruggle;
 globalThis.KinkyDungeonStruggle = function(struggleGroup: string, StruggleType: string, index: number, query: boolean = false, retData?: KDStruggleData) {
   let restraint = KinkyDungeonGetRestraintItem(struggleGroup) as BWB_WearableInstance;
-  if (!query && restraint.bwb_level) {
+  if (!query && restraint && restraint.bwb_level) {
     if (restraint.bwb_level > Level_StopRemove && (
       StruggleType === 'Remove' || StruggleType === 'Unlock'
     )) {
