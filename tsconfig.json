@@ -5,16 +5,10 @@
     "outFile": "./dist/index.js",
     "erasableSyntaxOnly": true,
     "alwaysStrict": true,
-    "typeRoots": [
-      "./KinkiestDungeon/node_modules/@types",
-      "./KinkiestDungeon/node_modules/@pixi"
-    ],
     "moduleResolution": "node",
     "skipLibCheck": true
   },
   "files": [
-    "KinkiestDungeon/Scripts/lib/LZString.d.ts",
-    "KinkiestDungeon/Scripts/Typedef.d.ts",
     "KinkiestDungeon/out/main.d.ts",
     "types.ts",
     "data.ts",
