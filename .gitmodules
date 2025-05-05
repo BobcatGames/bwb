@@ -1,3 +1,4 @@
 [submodule "KinkiestDungeon"]
 	path = KinkiestDungeon
 	url = https://github.com/Ada18980/KinkiestDungeon
+	branch = 5.5
