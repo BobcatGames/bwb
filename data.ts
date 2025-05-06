@@ -24,7 +24,7 @@ const Level_StopRemove = 7;
 let Base_Level = 1;
 
 const TextEnglish = {
-  BWB_Powerup_Generic: "Your bonded with ${RestraintName} a little!",
+  BWB_Powerup_Generic: "You bonded with ${RestraintName} a little!",
   BWB_Powerup_1st:
     "You notice you've been wearing ${RestraintName} for a while.",
   BWB_Powerup_Low: "It's getting comfy wearing ${RestraintName}.",
