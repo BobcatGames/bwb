@@ -6,6 +6,7 @@
     "erasableSyntaxOnly": true,
     "alwaysStrict": true,
     "moduleResolution": "node",
+    "removeComments": true,
     "skipLibCheck": true
   },
   "files": [
