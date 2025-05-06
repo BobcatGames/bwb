@@ -30,7 +30,7 @@ Yes! The save code/file should contain every bit of info. The saves generated sh
 
 ### Can I search for the item by it's custom name?
 
-Yes, and I didn't even had to add a single of code, it just worked! Thanks Ada!
+Yes, and I didn't even have to add a single of code, it just worked! Thanks Ada!
 
 ### What are the exact effects of levelling up your "bond" with the item?
 
@@ -42,7 +42,7 @@ Try the mod to find out 🙂. But as this mod is intended for longer runs, if yo
   * You have to wear the restraint during the whole floor, you cannot take it off even once.
   * If you manage to do it, the numeric stats will increase by 10% (e.g. from +50% accuracy to +55%). Let's call it the "bond level", the number of floors cleared this way.
   * If you (or someone) takes it off, the bonus for this floor will be lost (your bond level won't increase), but all past bonuses will remain (it won't decrease either). Just equip it back an continue.
-  * If you reach bond level 5, you'll be able to rename the item from the inventory menu.
+  * If you reach bond level 3, you'll be able to rename the item from the inventory menu.
   * Even later on, you'll lose the ability to cut, then struggle, then unlock/uneqip: the character doesn't want to harm it, or even take it off.
     * It can always be removed with shrines, scrolls (for toys), and shopkeep.
   * Extra flavor text if you apply a lock.
@@ -76,7 +76,7 @@ First, build the base game. We only need the types, but we need the node_modules
     git submodule update
     cd KinkiestDungeon
     npm install
-    npx tsc --declaration --emitDeclarationOnly
+    npm run buildTypes
     cd ..
 
 Then, in main project:
