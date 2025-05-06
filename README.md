@@ -40,16 +40,16 @@ Try the mod to find out 🙂. But as this mod is intended for longer runs, if yo
   <summary>Spoilers (click to open)</summary>
 
   * You have to wear the restraint during the whole floor, you cannot take it off even once.
-  * If you manage to do it, the numeric stats will increase by 10% (e.g. from +50% accuracy to +55%). Let's call it the "bond level", the number of floors cleared this way.
+  * If you manage to do it, the numeric stats will increase by 7% (e.g. from +50% accuracy to +53.5%). Let's call it the "bond level", the number of floors cleared this way.
   * If you (or someone) takes it off, the bonus for this floor will be lost (your bond level won't increase), but all past bonuses will remain (it won't decrease either). Just equip it back an continue.
   * If you reach bond level 3, you'll be able to rename the item from the inventory menu.
   * Even later on, you'll lose the ability to cut, then struggle, then unlock/uneqip: the character doesn't want to harm it, or even take it off.
     * It can always be removed with shrines, scrolls (for toys), and shopkeep.
-  * Extra flavor text if you apply a lock.
-
-  Plans:
-
-  * If you clear a floor while it was locked, maybe add an extra bit of bonus.
+  * If you lock your item on (type of lock doesn't matter), you get an extra +1% per level cleared that way.
+  * Bonuses are multiplicative:
+    * Bond level 2 = +14.49%
+    * Bond level 1 with lock level 1 = +8.07%
+    * Reasoning: a restraint levelled up to +100% bonus and a new restraint with +100% bonus should behave the same, the player shouldn't be incentivized to ditch the old one b/c the new one has better "base stats".
 
   **Can't I just rename everything without waiting that many floors?**
 

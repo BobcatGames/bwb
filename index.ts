@@ -72,8 +72,15 @@ function increaseRestraintLevel(item: Readonly<BWB_WearableInstance>) {
     if (!item.bwb_level) {
       // New restraint the mod hasn't encountered before.
       item.bwb_level = Base_Level;
+      item.bwb_lockLevel = 0;
     } else {
       item.bwb_level++;
+    }
+
+    if (item.bwb_hasNewLock) {
+      item.bwb_hasNewLock = false;
+    } else if (!item.bwb_hasNewLock && item.lock) {
+      item.bwb_lockLevel++;
     }
 
     const enchantments = Object.keys(KDEventEnchantmentModular);
@@ -93,25 +100,50 @@ function increaseRestraintLevel(item: Readonly<BWB_WearableInstance>) {
       // This way, we can avoid a bunch of floating point issues (might not be an issue, but still),
       // and we can apply more complex functions.
 
-      // Base: +10% stat per level
-      // Might be a bit too strong?
+      // Base: +7% stat per level
+      // Lock: +1% stat per level
+
+      const levelBonus = 1.07 ** item.bwb_level;
+      const lockBonus = 1.01 ** item.bwb_lockLevel;
+
+      // console.debug('Level up bonuses for ' + item.inventoryVariant);
+      // console.debug(item);
+      // console.debug(newLevel);
 
       switch (e.trigger) {
-        // The icon's "power" is used for something? Better no mess with it.
+        // The icon's "power" is used for something? Better not mess with it.
         case "icon":
           continue;
         // For some reason, this event's power is not like the others, it's POW+1 instead of POW.
         case "afterCalcManaPool":
           let baseAmt = e.bwb_basePower - 1;
-          e.power = 1 + baseAmt * 1.1 ** item.bwb_level;
+          e.power = 1 + baseAmt * levelBonus * lockBonus;
           break;
         default:
         case "tick":
-          e.power = e.bwb_basePower * 1.1 ** item.bwb_level;
+          e.power = e.bwb_basePower * levelBonus * lockBonus;
           break;
       }
     }
   });
+}
+
+let Orig_KinkyDungeonLock = KinkyDungeonLock;
+globalThis.KinkyDungeonLock = function(...args) {
+  const item = args[0] as BWB_WearableInstance;
+  const newLockType = args[1];
+  console.debug('Lock called', item, newLockType);
+  // Combinations:
+  // Giving empty lock              = removing lock, we don't care
+  // Item has lock, giving new lock = upgrading lock, doesn't count as new lock
+  // Item has no lock, giving one   = new lock, we care about that event
+  if (item.inventoryVariant && !item.lock && newLockType) {
+    modifyVariantData(item, item => {
+      item.bwb_hasNewLock = true;
+    })
+  }
+
+  return Orig_KinkyDungeonLock(...args);
 }
 
 let Orig_KDAdvanceLevel = KDAdvanceLevel;
@@ -127,7 +159,10 @@ globalThis.KDAdvanceLevel = function (...args) {
       // New restraints do not count, only for the next level
       if (item.bwb_isNewRestraint) {
         // Clear the new restraint flag, it's not new for the next level
-        modifyVariantData(item, (item) => (item.bwb_isNewRestraint = false));
+        modifyVariantData(item, (item) => {
+          item.bwb_isNewRestraint = false;
+          item.bwb_hasNewLock = false;
+        });
         continue;
       }
 

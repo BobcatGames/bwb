@@ -17,6 +17,8 @@ function cloneCustomDataTo(
   //console.debug(dest);
   dest.bwb_isNewRestraint = src.bwb_isNewRestraint;
   dest.bwb_level = src.bwb_level;
+  dest.bwb_hasNewLock = src.bwb_hasNewLock;
+  dest.bwb_lockLevel = src.bwb_lockLevel;
   dest.bwb_trueName = src.bwb_trueName;
 
   src.events.forEach((e: BWB_Event, i) => {

@@ -8,6 +8,10 @@ interface BWB_CustomItemData {
   bwb_isNewRestraint?: boolean;
   /** The bond level, i.e. the number of completed floors with the restraint equipped. */
   bwb_level?: number;
+  /** The restraint was newly locked this floor. */
+  bwb_hasNewLock?: boolean;
+  /** The number of floors completed with the restraint locked. */
+  bwb_lockLevel?: number;
   /** The true, player-chosen name of the item */
   bwb_trueName?: string;
   events: BWB_Event[];
