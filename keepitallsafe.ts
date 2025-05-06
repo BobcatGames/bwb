@@ -12,9 +12,9 @@ function cloneCustomDataTo(
   src: BWB_WearableInstance | BWB_VariantTemplate,
   dest: BWB_WearableInstance | BWB_VariantTemplate
 ) {
-  console.debug("Copy:");
-  console.debug(src);
-  console.debug(dest);
+  //console.debug("Copy:");
+  //console.debug(src);
+  //console.debug(dest);
   dest.bwb_isNewRestraint = src.bwb_isNewRestraint;
   dest.bwb_level = src.bwb_level;
   dest.bwb_trueName = src.bwb_trueName;

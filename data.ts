@@ -21,7 +21,7 @@ const Level_StopRemove = 7;
  * After completeing a floor, the starting bond level will be this.
  * Default is 1.
  */
-let Base_Level = 7;
+let Base_Level = 1;
 
 const TextEnglish = {
   BWB_Powerup_Generic: "Your bond with ${RestraintName} increased a little!",

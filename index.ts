@@ -180,9 +180,17 @@ globalThis.KDAdvanceLevel = function (...args) {
       });
       KinkyDungeonSendTextMessage(5, text, color, 5);
 
-      // TODO: Some restraints cannot be locked, e.g. toys need a belt.
-      if (item.bwb_level >= 5 && !r.item.lock) {
-        KinkyDungeonSendTextMessage(5, BWB_TextGet("BWB_LockUrge"), KDBasePink, 5);
+      if (
+        item.bwb_level >= 5 &&
+        !r.item.lock &&
+        KinkyDungeonIsLockable(KDRestraint(item))
+      ) {
+        KinkyDungeonSendTextMessage(
+          5,
+          BWB_TextGet("BWB_LockUrge"),
+          KDBasePink,
+          5
+        );
       }
     }
   }
