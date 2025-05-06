@@ -3,7 +3,7 @@
 
 A mod for Kinky Dungeon (https://ada18980.itch.io/kinky-dungeon/ https://github.com/Ada18980/KinkiestDungeon/), by Strait Laced Games LLC.
 
-[Download it from here](https://github.com/BobcatGames/bwb/releases)
+[Download the mod from here](https://github.com/BobcatGames/bwb/releases)
 
 ## What is the mod about?
 
@@ -14,7 +14,7 @@ The mod only affects Enchanted (and cursed) restraints. It has no effect on:
 * Weapons
 * Armor
 * Generic restraints
-* Uniquie restraints (like the potion absorber, ancient restraints etc.)
+* Unique restraints (like the potion absorber, ancient restraints etc.)
 
 Equally for balance, thematic, and technical reasons.
 
@@ -55,17 +55,9 @@ Try the mod to find out 🙂. But as this mod is intended for longer runs, if yo
 
   You want the rewards without playing the game, huh? JK.
 
-  Unpack the mod, and edit the index.ks file with a text editor (NOT a word processor, like MS Word). Even nodepad is fine.
+  In "Mod Configuration" / "Bonding with Bondage", check the "Always allow" option.
 
-  You'll find a line close to the top:
-
-    let Level_GiveName = Level_Medium;
-
-  Change Level_Medium to 0, like this:
-
-    let Level_GiveName = 0;
-
-  Copy index.ks back to the zip file, and you'll be able to rename every enchanted restraint.
+  Now you'll be able to rename every enchanted restraint and armor. Generic/unique restraints still can't be renamed, and it's outside the scope of this mod.
 </details>
 
 ## Licence
@@ -93,7 +85,7 @@ Then, in main project:
     npm run build      # Linux, MacOS, Win+Bash
     npm run build:win  # Win (cmd or powershell)
 
-If you don't have 7zip install, you can do this instead:
+If you don't have 7zip installed, you can do this instead:
 
     npm install
     npx tsc
@@ -102,7 +94,7 @@ Then zip up the relevant files:
 
  * dist/index.js (rename to .ks if needed)
  * mod.json
- * the Data folder
+ * the png's inside Data folder
 
 ## Contributing, bug reporting
 

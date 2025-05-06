@@ -326,7 +326,7 @@ KDInventoryActionsDefault.restraint = (item: BWB_WearableInstance) => {
   // If not, it's a mundane (or unique) restraint.
   const retVal = Orig_restraint(item);
   if (
-    (item.inventoryVariant && Level_GiveName === 0) ||
+    (item.inventoryVariant && bwb_alwaysAllowRenaming()) ||
     (item.bwb_level && item.bwb_level >= Level_GiveName)
   ) {
     retVal.push("BWBRename");
@@ -341,7 +341,7 @@ KDInventoryActionsDefault.looserestraint = (item: BWB_WearableInstance) => {
   if (!itemTemplate) return retVal;
 
   if (
-    Level_GiveName === 0 ||
+    bwb_alwaysAllowRenaming() ||
     (item.bwb_level && item.bwb_level >= Level_GiveName)
   ) {
     retVal.push("BWBRename");

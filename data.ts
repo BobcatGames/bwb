@@ -9,7 +9,6 @@ const Level_XHigh = 6;
 /**
  * The min. bond level needed to rename the item.
  * Default is Level_Medium.
- * Set to 0 to rename ALL enchanted items.
  */
 let Level_GiveName = Level_Medium;
 
@@ -49,4 +48,6 @@ const TextEnglish = {
   BWB_NoRemove: "Nah, it's too comfy.",
 
   BWB_InventoryAction_Rename: "Give it a nickname (empty to reset)",
+  KDModButtonBWB: "Bonding with Bondage",
+  KDModButtonBWB_AlwaysAllowRenaming: "Always allow renaming restraints",
 } as const;
