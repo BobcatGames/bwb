@@ -57,8 +57,7 @@ function assureRestraintDataCorrect(item: BWB_WearableInstance) {
 
 // When an item is added to the inventory, the game creates a new object.
 const Orig_KinkyDungeonInventoryAdd = KinkyDungeonInventoryAdd;
-// @ts-expect-error
-KinkyDungeonInventoryAdd = function (
+globalThis.KinkyDungeonInventoryAdd = function (
   item: BWB_WearableInstance,
   ...args: any[]
 ) {

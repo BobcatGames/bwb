@@ -115,9 +115,7 @@ function increaseRestraintLevel(item: Readonly<BWB_WearableInstance>) {
 }
 
 let Orig_KDAdvanceLevel = KDAdvanceLevel;
-// @ts-expect-error
-KDAdvanceLevel = function (...args) {
-  // @ts-expect-error Easier than typing out all arguments
+globalThis.KDAdvanceLevel = function (...args) {
   const retVal = Orig_KDAdvanceLevel(...args);
   // This code MUST be run AFTER advancing the level, that's when the level
   // variables will be correct
@@ -226,8 +224,7 @@ function commitRenaming(item: BWB_WearableInstance) {
 }
 
 const Orig_KinkyDungeonRun = KinkyDungeonRun;
-// @ts-expect-error
-KinkyDungeonRun = function () {
+globalThis.KinkyDungeonRun = function () {
   const retVal = Orig_KinkyDungeonRun();
   // Cancel renaming if we switch screens
   if (KinkyDungeonDrawState !== "Inventory") {
@@ -241,13 +238,11 @@ KinkyDungeonRun = function () {
 // e.g. the currently selected item is provided to us.
 const Orig_KinkyDungeonDrawInventorySelected =
   KinkyDungeonDrawInventorySelected;
-// @ts-expect-error
-KinkyDungeonDrawInventorySelected = function (...args) {
-  // @ts-expect-error Easier than typing out all arguments
+globalThis.KinkyDungeonDrawInventorySelected = function (...args) {
   const retVal = Orig_KinkyDungeonDrawInventorySelected(...args);
   if (retVal && isRenaming) {
     const selectedItem = args[0].item as BWB_WearableInstance;
-    const xOffset = args[3] as number;
+    const xOffset = args[3];
 
     // Copied from KinkyDungeonInventory.ts, KinkyDungeonDrawInventory()
     let x = canvasOffsetX_ui + xOffset + 640 * KinkyDungeonBookScale - 2 + 18;
@@ -355,19 +350,18 @@ KDInventoryActionsDefault.looserestraint = (item: BWB_WearableInstance) => {
 };
 
 const Orig_KDGetItemName = KDGetItemName;
-// @ts-expect-error
-KDGetItemName = function (item: BWB_WearableInstance): string {
+globalThis.KDGetItemName = function (...args): string {
+  const item = args[0] as BWB_WearableInstance;
   if (item && item.bwb_trueName) return item.bwb_trueName;
   const template = KDGetRestraintVariant(item) as BWB_VariantTemplate;
   if (template && template.bwb_trueName) return template.bwb_trueName;
-  return Orig_KDGetItemName(item);
+  return Orig_KDGetItemName(...args);
 };
 
 const Orig_KDGetItemNameString = KDGetItemNameString;
-// @ts-expect-error
-KDGetItemNameString = function (name: string): string {
+globalThis.KDGetItemNameString = function (name: string): string {
   // For this function call, the cast is OK.
-  const template = KDGetRestraintVariant({ name } as BWB_WearableInstance) as BWB_VariantTemplate;
+  const template = KDGetRestraintVariant({ name } as item) as BWB_VariantTemplate;
   if (template && template.bwb_trueName) return template.bwb_trueName;
   return Orig_KDGetItemNameString(name);
 };
