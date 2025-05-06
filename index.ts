@@ -106,10 +106,6 @@ function increaseRestraintLevel(item: Readonly<BWB_WearableInstance>) {
       const levelBonus = 1.07 ** item.bwb_level;
       const lockBonus = 1.01 ** item.bwb_lockLevel;
 
-      // console.debug('Level up bonuses for ' + item.inventoryVariant);
-      // console.debug(item);
-      // console.debug(newLevel);
-
       switch (e.trigger) {
         // The icon's "power" is used for something? Better not mess with it.
         case "icon":
@@ -132,7 +128,6 @@ let Orig_KinkyDungeonLock = KinkyDungeonLock;
 globalThis.KinkyDungeonLock = function(...args) {
   const item = args[0] as BWB_WearableInstance;
   const newLockType = args[1];
-  console.debug('Lock called', item, newLockType);
   // Combinations:
   // Giving empty lock              = removing lock, we don't care
   // Item has lock, giving new lock = upgrading lock, doesn't count as new lock
@@ -339,7 +334,7 @@ KDInventoryAction.BWBRename = {
       return "InventoryAction/Use";
     } else {
       // I could use the captive rename icon, but this one stands out more
-      return "Data/BWB_Rename";
+      return `Data/BWB_Rename${getSupportedLanguageCode()}`;
     }
   },
   valid: (_player, _item) => {
