@@ -1,7 +1,6 @@
 {
   "scripts": {
-    "build": "tsc && mv dist/index.js dist/index.ks && 7z a -tzip ./dist/bwb.zip ./dist/index.ks ./mod.json  Data/*.png Data/*.csv",
-    "build:win": "tsc && move .\\dist\\index.js .\\dist\\index.ks && 7z a -tzip ./dist/bwb.zip ./dist/index.ks ./mod.json  Data/*.png Data/*.csv"
+    "build": "tsc && node ./postBuild.mjs"
   },
   "dependencies": {
     "typescript": "^5.8.3"

@@ -82,8 +82,7 @@ First, build the base game. We only need the types, but we need the node_modules
 Then, in main project:
 
     npm install
-    npm run build      # Linux, MacOS, Win+Bash
-    npm run build:win  # Win (cmd or powershell)
+    npm run build
 
 If you don't have 7zip installed, you can do this instead:
 
