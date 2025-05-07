@@ -151,6 +151,15 @@ globalThis.KDAdvanceLevel = function (...args) {
     const wornRestraints = KinkyDungeonAllRestraintDynamic();
     for (const r of wornRestraints) {
       const item = r.item as BWB_WearableInstance;
+
+      // Mundane restraints don't have stats to increase
+      // Unique restraints are too special
+      if (!item.inventoryVariant) continue;
+
+      // Armors don't count, no matter how enchanted they are.
+      const baseRestraint = KDRestraint(item);
+      if (baseRestraint.armor) continue;
+
       // New restraints do not count, only for the next level
       if (item.bwb_isNewRestraint) {
         // Clear the new restraint flag, it's not new for the next level
@@ -161,10 +170,7 @@ globalThis.KDAdvanceLevel = function (...args) {
         continue;
       }
 
-      const baseRestraint = KDRestraint(item);
-      // Armors don't count, no matter how enchanted they are.
       // TODO: check for mimic handling.
-      if (baseRestraint.armor) continue;
 
       // TODO: Do something with locked restraints
       //       But only, if it was locked througout the whole floor.
