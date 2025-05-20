@@ -52,7 +52,7 @@ KDEventMapGeneric.postApply.bwb_newRestraint = (
 ) => {
   const item = data.item as BWB_WearableInstance;
   // Technically, this line should belong in keepitallsafe.ts
-  assureRestraintDataCorrect(item);
+  ensureRestraintDataCorrect(item);
 
   // Truthy, if we're currently removing an item, and this one becomes the top.
   // In this case, we're not actually equipping anything new.
@@ -60,6 +60,12 @@ KDEventMapGeneric.postApply.bwb_newRestraint = (
   // We don't care about generic items.
   if (!data.item.inventoryVariant) return;
 
+  // The event fires twice, I guess for game engine reasons.
+  // To avoid doubling, limit the flavor text to once per floor.
+  if (item.bwb_level && item.bwb_level >= Level_StopCut && !item.bwb_isNewRestraint) {
+    const msg = TextKeysEquip[Math.floor(Math.random() * TextKeysEquip.length)];
+    KinkyDungeonSendTextMessage(5, BWB_TextGet(msg), KDBasePink, 5);
+  }
   modifyVariantData(item, (item) => (item.bwb_isNewRestraint = true));
 };
 

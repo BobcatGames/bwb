@@ -51,7 +51,7 @@ function modifyVariantData(
  * If yes, we copy them back.
  * @param item
  */
-function assureRestraintDataCorrect(item: BWB_WearableInstance) {
+function ensureRestraintDataCorrect(item: BWB_WearableInstance) {
   const backup = KDGetRestraintVariant(item) as BWB_VariantTemplate;
   if (!backup) return;
   cloneCustomDataTo(backup, item);
@@ -64,5 +64,5 @@ globalThis.KinkyDungeonInventoryAdd = function (
   ...args: any[]
 ) {
   Orig_KinkyDungeonInventoryAdd(item, ...args);
-  assureRestraintDataCorrect(item);
+  ensureRestraintDataCorrect(item);
 };
