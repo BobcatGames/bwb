@@ -180,7 +180,7 @@ globalThis.KDAdvanceLevel = function (...args) {
       increaseRestraintLevel(item);
 
       const fullName = KDGetItemName(r.item);
-      let flavorTextKey: FlavorTextKey;
+      let flavorTextKey: TextKey;
       let color = KDBasePink;
       switch (item.bwb_level) {
         case Level_1:
@@ -420,7 +420,7 @@ KDInventoryAction.Lock.click = (e, item: Readonly<BWB_WearableInstance>) => {
   Orig_Lockclick(e, item);
   if (!item.bwb_level) return;
 
-  let textKey: FlavorTextKey;
+  let textKey: TextKey;
   if (item.bwb_level >= Level_XHigh) {
     textKey = "BWB_SelfLock_XHigh";
   } else if (item.bwb_level >= Level_High) {
