@@ -448,11 +448,29 @@ const Orig_KinkyDungeonStruggle = KinkyDungeonStruggle;
 globalThis.KinkyDungeonStruggle = function(struggleGroup: string, StruggleType: string, index: number, query: boolean = false, retData?: KDStruggleData) {
   let restraint = KinkyDungeonGetRestraintItem(struggleGroup) as BWB_WearableInstance;
   if (!query && restraint && restraint.bwb_level) {
-    if (restraint.bwb_level > Level_StopRemove && (
-      StruggleType === 'Remove' || StruggleType === 'Unlock'
-    )) {
-      KinkyDungeonSendTextMessage(5, BWB_TextGet("BWB_NoRemove", { RestraintName: KDGetItemName(restraint) }), KDBasePink, 2);
+    if (restraint.bwb_level > Level_StopRemove) {
+      if (StruggleType === "Remove") {
+        KinkyDungeonSendTextMessage(
+          5,
+          BWB_TextGet("BWB_NoRemove", {
+            RestraintName: KDGetItemName(restraint),
+          }),
+          KDBasePink,
+          2
+        );
       return "Fail";
+      }
+      if (StruggleType === "Unlock" || StruggleType === "Pick") {
+        KinkyDungeonSendTextMessage(
+          5,
+          BWB_TextGet("BWB_NoUnlock", {
+            RestraintName: KDGetItemName(restraint),
+          }),
+          KDBasePink,
+          2
+        );
+        return "Fail";
+      }
     }
     if (restraint.bwb_level > Level_StopCut && StruggleType === 'Cut') {
       KinkyDungeonSendTextMessage(
