@@ -294,9 +294,10 @@ globalThis.KinkyDungeonDrawInventorySelected = function (...args) {
     const selectedItem = args[0].item as BWB_WearableInstance;
     const xOffset = args[3];
 
-    // Copied from KinkyDungeonInventory.ts, KinkyDungeonDrawInventory()
-    let x = canvasOffsetX_ui + xOffset + 640 * KinkyDungeonBookScale - 2 + 18;
-    let y = canvasOffsetY_ui + 483 * KinkyDungeonBookScale - 5 + 52;
+    // Copied and adjusted from KinkyDungeonInventory.ts, KinkyDungeonDrawInventory()
+    // x and y are the top left coordinates of the button row, when applied to a textbox
+    let x = canvasOffsetX_ui + xOffset + 640 * KinkyDungeonBookScale + 12;
+    let y = canvasOffsetY_ui + 483 * KinkyDungeonBookScale + 51;
 
     // Cancel renaming if we select another item
     if (selectedItem.inventoryVariant !== currentlyRenamingItem) {
@@ -308,8 +309,8 @@ globalThis.KinkyDungeonDrawInventorySelected = function (...args) {
       "BWB_RenameTextField",
       x + KDInventoryActionSpacing * 2,
       y + KDInventoryActionSpacing,
-      300,
-      70,
+      (KDInventoryActionSpacing - 2) * 5,
+      KDInventoryActionSpacing - 8,
       "text",
       "",
       "60"
