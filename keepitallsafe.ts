@@ -34,14 +34,14 @@ function cloneCustomDataTo(
  * Ensures that the restraint specific data is kept globally too.
  * Only make changes to restraints through this function!
  * @param item
- * @param modifyerFunction
+ * @param modifierFunction
  */
 function modifyVariantData(
   item: BWB_WearableInstance,
-  modifyerFunction: (item: BWB_WearableInstance) => void
+  modifierFunction: (item: BWB_WearableInstance) => void
 ) {
   const mutableItem = item;
-  modifyerFunction(mutableItem);
+  modifierFunction(mutableItem);
   const globalVariant = KDGetRestraintVariant(item);
   cloneCustomDataTo(mutableItem, globalVariant);
 }

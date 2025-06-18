@@ -14,7 +14,7 @@
    * If the item was equipped this floor, it will be marked.
    * It it doesn't have a mark:
     * It was equipped on a prev. floor OR
-    * It was equipped bef7ore installing this mod.
+    * It was equipped before installing this mod.
   We can't really do much about the latter case, so we'll just let it slide.
 
   We do the magic, and then unmark all.
@@ -22,25 +22,6 @@
 
   The marks survive saving and reloading, so no extra save+load code is needed.
  */
-
-/*
-  TODO:
-  - Finetune the stat increase, *1.1 seems alright for base.
-    But be careful for class synergies, e.g.
-      Toys + trainee is OP
-      Hands + warrior can be crippling
-
-  If you removed an item that already has some levels, and put it back:
-    Min 5:
-      You can't help but notice that putting the ${RestraintName} on felt a little good...
-
-    Min 10:
-      You felt so lonely without the ${RestraintName}, but finally it's back!
-
-    Min 14:
-      How did the ${RestraintName} even get off? You promise you'll never take it off again.
-
-*/
 
 // #region Levelling up and keeping track
 // **************************************
@@ -175,13 +156,6 @@ globalThis.KDAdvanceLevel = function (...args) {
         });
         continue;
       }
-
-      // TODO: check for mimic handling.
-
-      // TODO: Do something with locked restraints
-      //       But only, if it was locked througout the whole floor.
-      //       A bit extra stat buff?
-      //if (!r.item.lock)
 
       increaseRestraintLevel(item);
 
