@@ -2,10 +2,10 @@
   "modname": "Bonding with Bondage",
   "moddesc": "If you wear a restraint through the whole floor, it's enchantment stats increase a bit.",
   "author": "BobcatG",
-  "modbuild": "0.2.2",
+  "modbuild": "1.0.0",
   "gamemajor": 5,
   "gameminor": 4,
-  "gamepatch_min": 66,
+  "gamepatch_min": 75,
   "gamepatch_max": -1,
-  "priority": 0
+  "priority": -10
 }
